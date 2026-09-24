@@ -94,10 +94,11 @@ TOOLS = [
     ),
     _fn(
         "analyze_text",
-        "사용자가 보여준 원고를 객관적으로 측정한다: 글자 수, 원고지 매수, 문장/문단 수, 평균 문장 길이, "
-        "지나치게 긴 문장, 반복되는 단어, 반복되는 문장 끝맺음, 접속사 사용. 퇴고 피드백 전에 사용한다.",
-        {"text": {"type": "string", "description": "분석할 원고 전문"}},
-        ["text"],
+        "원고를 객관적으로 측정한다: 글자 수, 원고지 매수, 문장/문단 수, 평균 문장 길이, "
+        "지나치게 긴 문장, 반복되는 단어, 반복되는 문장 끝맺음, 접속사 사용. 퇴고 피드백 전에 사용한다. "
+        "사용자가 채팅에 붙여넣은 원고는 text 로, 저장된 글은 원문을 옮겨 적지 말고 id 로 넘긴다.",
+        {"text": {"type": "string", "description": "채팅에 붙여넣은 원고 전문"},
+         "id": {"type": "string", "description": "search_works·list_my_records 로 찾은 저장된 글의 id"}},
     ),
 ]
 
@@ -201,7 +202,15 @@ def execute(name: str, args: dict) -> dict:
             {"role": m["role"], "content": m["content"][:600]} for m in conv["messages"][-10:]
         ]}
     if name == "analyze_text":
-        return analyze_text(args.get("text", "")[:20000])
+        text = args.get("text") or ""
+        if args.get("id"):
+            work = data_service.get_record(args["id"]) or library_service.get_work(args["id"])
+            if not work:
+                return {"error": "해당 id 의 글을 찾을 수 없습니다."}
+            text = work.get("excerpt") or ""
+        if not text.strip():
+            return {"error": "분석할 원고가 비어 있습니다. text 또는 id 를 넘겨 주세요."}
+        return analyze_text(text[:20000])
     return {"error": f"알 수 없는 도구: {name}"}
 
 

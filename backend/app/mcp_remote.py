@@ -74,9 +74,10 @@ def get_conversation(conversation_id: str) -> dict:
 
 
 @mcp.tool()
-def analyze_text(text: str) -> dict:
-    """원고의 글자 수·원고지 매수·문장 길이·반복어·반복 어미·접속사를 측정한다 (퇴고용)."""
-    return _call("analyze_text", text=text)
+def analyze_text(text: Optional[str] = None, id: Optional[str] = None) -> dict:
+    """원고의 글자 수·원고지 매수·문장 길이·반복어·반복 어미·접속사를 측정한다 (퇴고용).
+    원고를 직접 넘기거나(text), 저장된 글의 id 를 넘긴다."""
+    return _call("analyze_text", text=text, id=id)
 
 
 @mcp.tool()

@@ -33,3 +33,10 @@ def test_read_work_returns_saved_text(client):
     work = tools.execute("read_work", {"id": rid})
     assert work["title"] == "내 글" and work["text"].startswith("전문") and work["text_is_partial"] is False
     assert "error" in tools.execute("read_work", {"id": "없음"})
+
+
+def test_analyze_text_by_saved_id(client):
+    rid = client.post("/api/data", json={"date": "2026-09-20", "value": 10, "memo": "초고", "title": "내 글",
+                                         "excerpt": "그리고 갔다. 그리고 왔다. 그리고 잤다."}).json()["id"]
+    assert tools.execute("analyze_text", {"id": rid})["conjunctions"] == {"그리고": 3}
+    assert "error" in tools.execute("analyze_text", {})

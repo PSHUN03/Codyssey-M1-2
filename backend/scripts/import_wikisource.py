@@ -437,6 +437,8 @@ def to_record(title: str, page: dict, genre: str, date: tuple[str, str] | None, 
     translator = header_field(content, "역자") or parent_translator
     role = re.compile(r"\s*:\s*(?:작|역|저|글|지음|옮김)\s*$")  # '림 화: 역' 같은 표기 정리
     author, translator = role.sub("", author).strip(), role.sub("", translator).strip()
+    # '김소월(김정식)'처럼 괄호 속 본명·한자 병기는 떼어 같은 작가가 통계에서 둘로 갈리지 않게 한다
+    author = re.sub(r"\s*[(（][^)）]*[)）]\s*$", "", author).strip() or author
     if translator and not re.search(r"[가-힣]", translator):
         return None  # 위키 사용자가 요즘 옮긴 번역문: 원작은 실재하지만 이 한글 본문의 날짜가 아니다
     if translated:
@@ -510,7 +512,8 @@ def main() -> None:
     print(f"작품 본문: {len(title_genre)}편")
     pages = fetch_pages(list(title_genre))
     col_pages = fetch_pages(list(collections))
-    sub_map: dict[str, list[str]] = {c: [t for t in subpage_titles(c) if t not in pages] for c in col_pages}
+    # 시집 하위 문서는 장르 분류에 함께 걸려 있어도 시집 경로로 처리해 시집의 지은이·날짜를 물려받게 한다
+    sub_map: dict[str, list[str]] = {c: subpage_titles(c) for c in col_pages}
     print(f"시집 하위 작품: {sum(len(v) for v in sub_map.values())}편")
     sub_pages = fetch_pages([t for subs in sub_map.values() for t in subs])
 
@@ -538,13 +541,17 @@ def main() -> None:
         if not content or content.lstrip().lower().startswith("#redirect") or is_index_page(content):
             skipped["목차·넘겨주기"] += 1
             continue
+        parent = title.rsplit("/", 1)[0] if "/" in title else None  # 분류에 직접 걸린 하위 문서
+        if parent in col_pages:
+            continue  # 시집 경로에서 처리
         genre = pick_genre(page["categories"], title_genre.get(title))
         if not genre:
             skipped["장르 없음"] += 1
             continue
         date = resolve(title, page)
-        parent = title.rsplit("/", 1)[0] if "/" in title else None  # 분류에 직접 걸린 하위 문서
-        rec = to_record(title, page, genre, date, parent, "")
+        parent_content = (_pages.get(parent) or {}).get("content") or "" if parent else ""
+        parent_author = header_field(parent_content, "지은이") or header_field(parent_content, "저자")
+        rec = to_record(title, page, genre, date, parent, parent_author)
         if rec:
             (records if date else library).append(rec)
         else:
