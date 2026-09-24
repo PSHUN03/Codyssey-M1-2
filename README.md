@@ -264,7 +264,23 @@ python -m scripts.mcp_smoke_test https://geulbeot-api.onrender.com/mcp   # 원�
 python -m scripts.mcp_smoke_test https://geulbeot-api.onrender.com       # 로컬 stdio
 ```
 
-{{MCP_RESULTS}}
+운영 서버 대상 실행 결과 (2026-09-24):
+
+```text
+연결: 원격 Streamable HTTP · https://geulbeot-api.onrender.com/mcp · 서버 이름: geulbeot
+도구: get_data_summary, get_statistics, search_works, list_my_records, list_conversations, get_conversation, analyze_text, add_writing_record
+- get_data_summary({}) → 성공: { "period": "1447-01-01 ~ 2026-09-24", "count": 1539, "metrics": { "total": 6809545, "average": 4424.7, "median": 315.0, "max": 333364, "min": 23, "std": 18980.2 }, "trend": "상승 (최근 30건 평균 16,372자, 직전
+- get_statistics({"group": "decade", "genre": "시"}) → 성공: { "group": "decade", "filters": { "genre": "시" }, "series": [ { "period": "1840년대", "count": 1, "total": 723, "average": 723.0 }, { "period": "1890년대", "count": 1, "total": …
+- search_works({"keyword": "고향", "genre": "시", "limit": 2}) → 성공: { "total": 45, "items": [ { "id": "1oCSVezvBVHH8T5c1aT8", "date": "1931-11-01", "title": "고향", "author": "박용철", "genre": "시", "value": 207, "source": "위키문헌", "memo" …
+- list_conversations({"limit": 3}) → 성공: { "items": [ { "id": "BJtemR13Aqk70oeMU0Gp", "title": "내 데이터 요약을 보고 어떤 장르가 많고 추세가 어떤지…", "preview": "데이터를 보면 **가장 많은 장르는 시**입니다. 총 **923건**이고, 평균 길이는 **337자**예요. 그다음은 **수필 297건(평균 3", "upda …
+
+연결: 로컬 stdio · mcp_server.py → https://geulbeot-api.onrender.com · 서버 이름: geulbeot
+도구: get_data_summary, get_statistics, search_works, list_my_records, list_conversations, get_conversation, add_writing_record
+- get_data_summary({}) → 성공: { "period": "1447-01-01 ~ 2026-09-24", "period_start": "1447-01-01", "period_end": "2026-09-24", "count": 1539, "metrics": { "total": 6809545, "average": 4424.7, "median": 315.0, "max": 333364, "min":
+- get_statistics({"group": "decade", "genre": "시"}) → 성공: { "group": "decade", "filters": { "genre": "시" }, "series": [ { "period": "1840년대", "count": 1, "total": 723, "average": 723.0 }, { "period": "1890년대", "count": 1, "total": …
+- search_works({"keyword": "고향", "genre": "시", "limit": 2}) → 성공: { "date": "1960-11-01", "title": "무제 3", "author": "이상", "genre": "시", "value": 223, "memo": "《무제 3》 이상 — 발표 월 기준 · 〈현대문학〉, 1960.11.", "excerpt": "손가락 같은 여인이 입술로 지문 …
+- list_conversations({"limit": 3}) → 성공: { "id": "BJtemR13Aqk70oeMU0Gp", "title": "내 데이터 요약을 보고 어떤 장르가 많고 추세가 어떤지…", "message_count": 2, "preview": "데이터를 보면 **가장 많은 장르는 시**입니다. 총 **923건**이고, 평균 길이는 **337자**예요. 그다음은 **수필 297건(평균 3" …
+```
 
 → 웹 채팅(Function Calling), 원격 MCP, 로컬 MCP 세 채널이 **같은 Firestore 데이터**를 보는 것을 확인했습니다. 원격 `/mcp`는 `tests/test_mcp_remote.py`에서 JSON-RPC 메시지(initialize → tools/list → tools/call)와 허용되지 않은 Host 거부까지 자동 테스트합니다.
 
