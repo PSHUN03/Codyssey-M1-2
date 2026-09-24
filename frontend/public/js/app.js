@@ -1,19 +1,29 @@
-// 진입점: 탭 전환, 다크 모드, 서버 상태(콜드스타트 안내), 각 화면 초기화
-import { api } from "./api.js";
-import { initChat, loadConversations, loadSummaryPanel } from "./chat.js";
+// 진입점: 해시 라우팅(#/, #/history, #/records, #/insights), 다크 모드, 서버 깨우기(콜드스타트 안내)
+import { API_BASE, api } from "./api.js";
+import { initChat, loadConversations, loadSummaryStrip, newChat } from "./chat.js";
 import { initData, loadList } from "./data.js";
 import { initInsights, loadInsights } from "./insights.js";
 import { $, $$, fillGenreSelects } from "./ui.js";
 
-const loaded = { data: false, insights: false };
+const PAGES = ["home", "history", "records", "insights"];
+const loaded = { records: false, insights: false };
 let insightsStale = false;
+let serverReady = false;
 
-function showView(view) {
-  $$(".tab").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.view === view)));
-  $$(".view").forEach((v) => (v.dataset.active = String(v.id === `view-${view}`)));
-  if (view === "data" && !loaded.data) { loaded.data = true; loadList(); }
-  if (view === "insights" && (!loaded.insights || insightsStale)) { loaded.insights = true; insightsStale = false; loadInsights(); }
-  try { history.replaceState(null, "", `#${view}`); } catch (_) {}
+function currentPage() {
+  const name = location.hash.replace(/^#\/?/, "");
+  return PAGES.includes(name) ? name : "home";
+}
+
+function route() {
+  const page = currentPage();
+  $$(".page").forEach((p) => (p.dataset.active = String(p.id === `page-${page}`)));
+  $$(".nav-link").forEach((a) => (a.dataset.route === page ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
+  window.scrollTo({ top: 0 });
+  if (!serverReady) return;
+  if (page === "history") loadConversations();
+  if (page === "records" && !loaded.records) { loaded.records = true; loadList(); }
+  if (page === "insights" && (!loaded.insights || insightsStale)) { loaded.insights = true; insightsStale = false; loadInsights(); }
 }
 
 function initTheme() {
@@ -56,18 +66,17 @@ async function main() {
   fillGenreSelects();
   initTheme();
   initChat();
-  initData(() => { loadSummaryPanel(); insightsStale = true; });
+  initData(() => { loadSummaryStrip(); insightsStale = true; });
   initInsights();
-  $$(".tab").forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
-
-  const initial = location.hash.slice(1);
-  showView(["chat", "data", "insights"].includes(initial) ? initial : "chat");
+  $("#docs-link").href = `${API_BASE}/docs`;
+  $("#nav-new-chat").addEventListener("click", () => newChat());
+  window.addEventListener("hashchange", route);
+  route();
 
   await wakeServer();
-  loadConversations();
-  loadSummaryPanel();
-  if (loaded.data) loadList();
-  if (loaded.insights) loadInsights();
+  serverReady = true;
+  loadSummaryStrip();
+  route();
 }
 
 main();

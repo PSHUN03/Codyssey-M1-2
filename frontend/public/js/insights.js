@@ -4,7 +4,7 @@ import { $, $$, compact, esc, fmt, hideTooltip, showTooltip } from "./ui.js";
 
 const METRIC_LABEL = { count: "작품 수", average: "평균 글자 수", total: "총 글자 수" };
 const GROUP_LABEL = { decade: "연대별", year: "연도별", month: "월별" };
-const state = { metric: "count", series: [], group: "year" };
+const state = { metric: "count", series: [], group: "decade" };
 
 function params() {
   return { mine: $("#i-mine").value, genre: $("#i-genre").value };
@@ -96,7 +96,7 @@ function tiles(s, stats) {
   const dirIcon = { "상승": "▲", "하락": "▼", "유지": "■" }[s.trend_direction] || "";
   $("#stat-tiles").innerHTML = `
     <div class="tile hero"><div class="label">기간</div><div class="value">${esc(s.period)}</div><div class="sub">${fmt(s.count)}개 레코드 · 기록한 날 ${fmt(stats.active_days)}일 · 최장 연속 ${fmt(stats.longest_streak_days)}일</div></div>
-    <div class="tile hero"><div class="label">최근 추세</div><div class="value">${dirIcon} ${esc(s.trend_direction)}</div><div class="sub" title="${esc(s.trend)}">${esc(s.trend)}</div></div>
+    <div class="tile hero dark"><div class="label">최근 추세 (AI에 주입)</div><div class="value">${dirIcon} ${esc(s.trend_direction)}</div><div class="sub" title="${esc(s.trend)}">${esc(s.trend)}</div></div>
     <div class="tile"><div class="label">평균 글자 수</div><div class="value">${fmt(m.average)}</div><div class="sub">중앙값 ${fmt(m.median)} · 표준편차 ${fmt(m.std)}</div></div>
     <div class="tile"><div class="label">총 글자 수</div><div class="value">${compact(m.total || 0)}</div><div class="sub">원고지 약 ${compact((m.total || 0) / 200)}매</div></div>
     <div class="tile"><div class="label">최대</div><div class="value">${fmt(m.max)}</div><div class="sub">${esc(s.longest ? `《${s.longest.title || "제목 없음"}》` : "")}</div></div>

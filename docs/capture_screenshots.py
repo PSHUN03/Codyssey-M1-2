@@ -27,16 +27,23 @@ def shot(page, name):
     print("saved", name)
 
 
+def wait_ready(page):
+    page.wait_for_selector("#server-status[data-state='ok']", timeout=120_000)
+    page.wait_for_function("document.querySelector('#summary-text').textContent.includes('개 기록')", timeout=60_000)
+
+
 with sync_playwright() as p:
     browser = p.chromium.launch(channel="msedge")
     ctx = browser.new_context(viewport={"width": 1440, "height": 900}, device_scale_factor=1, color_scheme="light",
                               locale="ko-KR")
     page = ctx.new_page()
     page.goto(FRONT, wait_until="networkidle")
-    page.wait_for_selector("#server-status[data-state='ok']", timeout=120_000)
-    page.wait_for_selector(".sum-grid", timeout=60_000)
+    wait_ready(page)
 
-    # 1) 데이터 요약이 보이는 채팅 화면 (질문 + 답변)
+    # 1) 데이터 요약이 보이는 채팅 화면 (질문 + 답변) — 이전 캡처 때 만든 같은 질문의 대화는 먼저 지운다
+    for conv in json.loads(urllib.request.urlopen(f"{BACK}/api/conversations").read()):
+        if conv["title"].startswith(QUESTION[:20]):
+            urllib.request.urlopen(urllib.request.Request(f"{BACK}/api/conversations/{conv['id']}", method="DELETE"))
     page.click(".chip[data-stage='주제 선정']")
     page.select_option("#chat-genre", "시")
     page.fill("#chat-input", QUESTION)
@@ -51,8 +58,8 @@ with sync_playwright() as p:
     listed = json.loads(urllib.request.urlopen(f"{BACK}/api/data?q=%EA%B0%80%EC%9D%84%20%EC%82%B0%EC%B1%85&mine=true").read())
     for item in listed["items"]:
         urllib.request.urlopen(urllib.request.Request(f"{BACK}/api/data/{item['id']}", method="DELETE"))
-    page.click(".tab[data-view='data']")
-    page.wait_for_selector("#data-rows tr td.cell-date")
+    page.goto(f"{FRONT}/#/records")
+    page.wait_for_selector("#data-rows tr td.cell-date", timeout=60_000)
     page.fill("#data-form input[name='title']", "가을 산책")
     page.select_option("#data-form select[name='genre']", "수필")
     page.select_option("#data-form select[name='stage']", "초고")
@@ -65,27 +72,28 @@ with sync_playwright() as p:
     page.wait_for_timeout(300)
     shot(page, "data")
 
-    # 3) 대화 기록 화면 (새로고침 → 목록에서 불러오기)
-    page.goto(FRONT, wait_until="networkidle")
-    page.wait_for_selector("#server-status[data-state='ok']", timeout=120_000)
-    page.wait_for_selector(".conv-item")
-    items = page.locator(".conv-item")
-    items.nth(1 if items.count() > 1 else 0).click()  # 방금 대화가 아닌 이전 대화를 불러온다
-    page.wait_for_selector("#messages .msg.assistant")
-    page.wait_for_timeout(500)
-    page.evaluate("document.querySelector('#messages').scrollTop = 0")
+    # 3) 대화 기록 화면 → 이전 대화 불러오기 (새로 연 페이지에서)
+    page.goto(f"{FRONT}/#/history", wait_until="networkidle")
+    wait_ready(page)
+    page.wait_for_selector(".conv-card")
+    page.wait_for_timeout(300)
+    shot(page, "history_list")
+    # 방금 나눈 대화와 제목이 다른 이전 대화를 불러온다 (불러오기 동작이 화면에서 구별되도록)
+    other = page.locator(".conv-card").filter(has_not_text=QUESTION[:20])
+    (other if other.count() else page.locator(".conv-card")).first.locator("[data-open]").click()
+    page.wait_for_selector("#page-home[data-active='true'] #messages .msg.assistant")
+    page.wait_for_timeout(600)
     shot(page, "history")
 
     # 4) 통계 + 그래프
-    page.click(".tab[data-view='insights']")
-    page.wait_for_selector("#chart svg")
-    page.select_option("#i-group", "decade")
-    page.wait_for_timeout(1200)
+    page.goto(f"{FRONT}/#/insights")
+    page.wait_for_selector("#chart svg", timeout=60_000)
+    page.wait_for_timeout(800)
     shot(page, "insights")
 
-    # 5) 다크 모드
+    # 5) 다크 모드 (홈)
+    page.goto(f"{FRONT}/#/")
     page.click("#theme-toggle")
-    page.click(".tab[data-view='chat']")
     page.wait_for_timeout(500)
     shot(page, "dark")
     page.click("#theme-toggle")

@@ -1,6 +1,6 @@
-// 채팅 화면: 메시지 전송/표시, 로딩 표시, 대화 기록 목록/불러오기/삭제, 데이터 요약 패널
+// 홈 채팅: 메시지 전송/표시, 로딩 표시, 주입된 요약 한 줄 / 대화 기록 화면: 목록·불러오기·삭제
 import { api } from "./api.js";
-import { $, $$, esc, fmt, markdown, timeAgo, toast } from "./ui.js";
+import { $, $$, compact, esc, fmt, markdown, timeAgo, toast } from "./ui.js";
 
 const TOOL_LABELS = {
   get_data_summary: "데이터 요약 조회",
@@ -16,16 +16,16 @@ const SUGGESTIONS = {
   "자유": [
     "내 글쓰기 기록을 요약해서 알려줘. 요즘 어떤 흐름이야?",
     "데이터에서 가장 긴 글과 가장 짧은 글은 뭐야?",
-    "글쓰기 습관을 만들려면 어떻게 목표를 세우면 좋을까?",
+    "글쓰기 습관을 만들려면 목표를 어떻게 세우면 좋을까?",
   ],
   "주제 선정": [
     "내 기록을 보고 이번 주에 써볼 만한 주제 3개 추천해줘.",
-    "요즘 너무 한 장르만 쓴 것 같아. 새로 도전할 장르와 주제를 제안해줘.",
+    "요즘 한 장르만 쓴 것 같아. 새로 도전할 장르와 주제를 제안해줘.",
     "'고향'을 소재로 한 시를 쓰고 싶어. 참고할 만한 작품도 찾아줘.",
   ],
   "구상·개요": [
     "'첫 출근 날'을 주제로 한 수필 개요를 짜줘. 분량은 내 평균 정도로.",
-    "짧은 단편소설 구상을 돕고 싶어. 인물과 갈등부터 같이 정해보자.",
+    "짧은 단편소설을 구상하고 싶어. 인물과 갈등부터 같이 정해보자.",
   ],
   "초고": [
     "첫 문장이 안 써져. 비 오는 날 버스 정류장 장면으로 시작하는 첫 문장 후보를 줘.",
@@ -38,7 +38,7 @@ const SUGGESTIONS = {
 
 const state = { convId: null, stage: "자유", sending: false, conversations: [] };
 
-// ------------------------------------------------------------ 렌더링
+// ------------------------------------------------------------ 메시지 렌더링
 function toolChips(calls) {
   if (!calls || !calls.length) return "";
   return `<div class="tool-chips">${calls.map((c) => `
@@ -47,7 +47,7 @@ function toolChips(calls) {
     </div>`).join("")}</div>`;
 }
 
-function addMessage({ role, content, stage, tool_calls, created_at }, { error = false } = {}) {
+function addMessage({ role, content, stage, tool_calls, created_at }, { error = false, scroll = true } = {}) {
   $("#chat-empty").hidden = true;
   const el = document.createElement("div");
   el.className = `msg ${role}${error ? " error" : ""}`;
@@ -58,7 +58,7 @@ function addMessage({ role, content, stage, tool_calls, created_at }, { error = 
     <div class="bubble">${body}</div>
     <div class="meta">${role === "assistant" ? "글벗" : "나"}${stage && stage !== "자유" ? ` · ${esc(stage)}` : ""}${when ? ` · ${when}` : ""}</div>`;
   $("#messages").appendChild(el);
-  el.scrollIntoView({ block: "end", behavior: "smooth" });
+  if (scroll) el.scrollIntoView({ block: "end", behavior: "smooth" });
   return el;
 }
 
@@ -91,18 +91,24 @@ function setStage(stage) {
   renderSuggestions();
 }
 
-// ------------------------------------------------------------ 대화 기록
+// ------------------------------------------------------------ 대화 기록 화면
+const plain = (s) => String(s || "").replace(/[*_`#>]+/g, "").replace(/\s+/g, " ").trim(); // 미리보기에서 마크다운 기호 제거
+
 function renderConversations() {
   const list = $("#conv-list");
   if (!state.conversations.length) {
-    list.innerHTML = `<li class="empty-note">아직 저장된 대화가 없어요. 첫 메시지를 보내면 자동으로 저장돼요.</li>`;
+    list.innerHTML = `<li class="empty-card"><strong>아직 저장된 대화가 없어요</strong>홈에서 첫 메시지를 보내면 자동으로 저장돼요.</li>`;
     return;
   }
   list.innerHTML = state.conversations.map((c) => `
-    <li class="conv-item" data-id="${esc(c.id)}" aria-current="${c.id === state.convId}" tabindex="0" role="button">
+    <li class="conv-card" data-id="${esc(c.id)}" aria-current="${c.id === state.convId}">
       <span class="t">${esc(c.title)}</span>
-      <span class="p">${esc(timeAgo(c.updated_at))} · ${c.message_count}개 메시지</span>
-      <button class="del" type="button" data-del="${esc(c.id)}" aria-label="대화 삭제" title="삭제">✕</button>
+      <span class="p">${esc(plain(c.preview))}</span>
+      <span class="m">${esc(timeAgo(c.updated_at))} · 메시지 ${c.message_count}개</span>
+      <div class="actions">
+        <button class="btn btn-primary btn-sm" type="button" data-open="${esc(c.id)}">불러오기</button>
+        <button class="btn btn-danger btn-sm" type="button" data-del="${esc(c.id)}">삭제</button>
+      </div>
     </li>`).join("");
 }
 
@@ -111,7 +117,7 @@ export async function loadConversations() {
     state.conversations = await api.listConversations();
     renderConversations();
   } catch (e) {
-    $("#conv-list").innerHTML = `<li class="empty-note">대화 목록을 불러오지 못했어요: ${esc(e.message)}</li>`;
+    $("#conv-list").innerHTML = `<li class="empty-card"><strong>대화 목록을 불러오지 못했어요</strong>${esc(e.message)}</li>`;
   }
 }
 
@@ -122,18 +128,20 @@ async function openConversation(id) {
     state.convId = conv.id;
     resetMessages();
     $("#chat-title").textContent = conv.title;
-    conv.messages.forEach((m) => addMessage(m));
-    renderConversations();
+    conv.messages.forEach((m) => addMessage(m, { scroll: false }));
+    location.hash = "#/";
+    requestAnimationFrame(() => ($("#messages").scrollTop = $("#messages").scrollHeight));
+    toast(`'${conv.title}' 대화를 불러왔어요.`);
   } catch (e) {
     toast(e.message, { error: true });
   }
 }
 
-function newChat() {
+export function newChat() {
+  if (state.sending) return;
   state.convId = null;
   resetMessages();
   $("#chat-title").textContent = "새 대화";
-  renderConversations();
   $("#chat-input").focus();
 }
 
@@ -193,38 +201,16 @@ function autosize() {
   t.style.height = `${Math.min(t.scrollHeight, 200)}px`;
 }
 
-// ------------------------------------------------------------ 요약 패널
-function trendIcon(dir) {
-  return { "상승": "▲", "하락": "▼", "유지": "■" }[dir] || "·";
-}
-
-export async function loadSummaryPanel() {
-  const box = $("#summary-box");
+// ------------------------------------------------------------ 주입된 요약 (채팅 카드 안 한 줄)
+export async function loadSummaryStrip() {
+  const el = $("#summary-text");
   try {
-    const [s, mine] = await Promise.all([api.summary(), api.summary({ mine: true })]);
-    const m = s.metrics || {};
-    box.innerHTML = `
-      <div class="sum-grid">
-        <div class="sum-item wide"><span class="k">기간</span><span class="v" style="font-size:14px">${esc(s.period)}</span></div>
-        <div class="sum-item"><span class="k">레코드</span><span class="v">${fmt(s.count)}개</span></div>
-        <div class="sum-item"><span class="k">평균 글자 수</span><span class="v">${fmt(m.average)}</span></div>
-        <div class="sum-item"><span class="k">최대</span><span class="v">${fmt(m.max)}</span></div>
-        <div class="sum-item"><span class="k">최소</span><span class="v">${fmt(m.min)}</span></div>
-      </div>
-      <div class="trend" data-dir="${esc(s.trend_direction)}"><span class="trend-icon" aria-hidden="true">${trendIcon(s.trend_direction)}</span><span><b>최근 추세</b> ${esc(s.trend)}</span></div>
-      <div class="sum-section">
-        <h3>내가 쓴 기록 · ${fmt(mine.count)}건</h3>
-        ${mine.count ? `<div class="trend" data-dir="${esc(mine.trend_direction)}"><span class="trend-icon" aria-hidden="true">${trendIcon(mine.trend_direction)}</span><span>${esc(mine.trend)}</span></div>
-        <ul class="mini-list" style="margin-top:6px">${mine.recent.slice(0, 3).map((r) => `<li><span class="name">${esc(r.date)} ${esc(r.title || "(제목 없음)")}</span><span class="n">${fmt(r.value)}자</span></li>`).join("")}</ul>`
-        : `<p class="hint" style="margin:0">'기록 관리' 탭에서 내 글쓰기 기록을 추가하면 AI가 참고해요.</p>`}
-      </div>
-      <div class="sum-section">
-        <h3>장르 분포</h3>
-        <ul class="mini-list">${s.by_genre.slice(0, 6).map((g) => `<li><span class="name">${esc(g.key)}</span><span class="n">${fmt(g.count)}편 · 평균 ${fmt(g.average)}자</span></li>`).join("")}</ul>
-      </div>
-      ${s.longest ? `<div class="sum-section"><h3>가장 긴 글</h3><p style="margin:0;font-size:13px">《${esc(s.longest.title || "제목 없음")}》 ${esc(s.longest.author || "")} · ${fmt(s.longest.value)}자</p></div>` : ""}`;
+    const s = await api.summary();
+    const icon = { "상승": "▲", "하락": "▼", "유지": "■" }[s.trend_direction] || "";
+    el.textContent = `${s.period} · ${fmt(s.count)}개 기록 · 평균 ${fmt(s.metrics?.average)}자 · 합계 ${compact(s.metrics?.total || 0)}자 · 최근 추세 ${icon} ${s.trend_direction}`;
+    $("#summary-strip").title = `채팅할 때마다 이 요약이 AI의 시스템 프롬프트에 주입돼요.\n최근 추세: ${s.trend}`;
   } catch (e) {
-    box.innerHTML = `<p class="form-error">요약을 불러오지 못했어요: ${esc(e.message)}</p>`;
+    el.textContent = `요약을 불러오지 못했어요: ${e.message}`;
   }
 }
 
@@ -241,7 +227,7 @@ export function initChat() {
     const input = $("#chat-input");
     input.value = b.dataset.text;
     autosize();
-    if (b.dataset.text.endsWith(":") || b.dataset.text.includes("\n")) input.focus();
+    if (b.dataset.text.includes("\n")) input.focus();
     else send(b.dataset.text);
   });
   $("#composer").addEventListener("submit", (e) => { e.preventDefault(); send($("#chat-input").value); });
@@ -249,16 +235,10 @@ export function initChat() {
     if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(e.target.value); }
   });
   $("#chat-input").addEventListener("input", autosize);
-  $("#new-chat").addEventListener("click", newChat);
-  $("#refresh-summary").addEventListener("click", loadSummaryPanel);
   $("#conv-list").addEventListener("click", (e) => {
     const del = e.target.closest("[data-del]");
-    if (del) { e.stopPropagation(); removeConversation(del.dataset.del); return; }
-    const item = e.target.closest(".conv-item");
-    if (item) openConversation(item.dataset.id);
-  });
-  $("#conv-list").addEventListener("keydown", (e) => {
-    const item = e.target.closest(".conv-item");
-    if (item && (e.key === "Enter" || e.key === " ") && e.target === item) { e.preventDefault(); openConversation(item.dataset.id); }
+    if (del) { removeConversation(del.dataset.del); return; }
+    const open = e.target.closest("[data-open]");
+    if (open) openConversation(open.dataset.open);
   });
 }

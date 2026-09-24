@@ -31,7 +31,7 @@ function row(r) {
       <td>${r.stage ? `<span class="tag">${esc(r.stage)}</span>` : ""}</td>
       <td class="num">${fmt(r.value)}</td>
       <td><div class="row-actions">
-        <button class="btn btn-ghost btn-sm" data-edit="${esc(r.id)}" type="button">수정</button>
+        <button class="btn btn-secondary btn-sm" data-edit="${esc(r.id)}" type="button">수정</button>
         <button class="btn btn-danger btn-sm" data-delete="${esc(r.id)}" type="button">삭제</button>
       </div></td>
     </tr>`;
