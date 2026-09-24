@@ -69,6 +69,7 @@ with sync_playwright() as p:
     page.click("#form-submit")
     page.wait_for_selector("#toast:not([hidden])")
     page.wait_for_selector("#data-rows tr.flash", timeout=60_000)
+    page.evaluate("window.scrollTo(0, 0)")  # 새로 추가된 첫 행과 토스트가 함께 보이도록
     page.wait_for_timeout(300)
     shot(page, "data")
 

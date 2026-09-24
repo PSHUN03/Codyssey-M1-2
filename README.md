@@ -4,9 +4,10 @@
 
 | 구분 | URL |
 |---|---|
-| 프론트엔드 (Vercel) | `{{FRONTEND_URL}}` |
-| 백엔드 API (Render) | `{{BACKEND_URL}}` |
-| Swagger UI | `{{BACKEND_URL}}/docs` |
+| 프론트엔드 (Vercel) | https://geulbeot-psi.vercel.app |
+| 백엔드 API (Render) | https://geulbeot-api.onrender.com |
+| Swagger UI | https://geulbeot-api.onrender.com/docs |
+| GitHub | https://github.com/PSHUN03/Codyssey-M1-2 |
 
 ※ 백엔드는 Render 무료 플랜이라 15분간 요청이 없으면 잠듭니다. 첫 접속 때 30~60초 걸릴 수 있으며, 프론트엔드는 접속 즉시 `/health`로 서버를 깨우고 늦어지면 안내 배너를 띄웁니다.
 
@@ -214,7 +215,15 @@ POST /api/chat
 4. 서버 → 답변 + tool_calls 를 conversations 에 저장
 ```
 
-{{TOOL_EXAMPLES}}
+**배포 서버에 실제로 저장된 호출 기록** (`GET /api/conversations/{id}`의 `messages[].tool_calls`, `reason`은 모델이 직접 쓴 문장):
+
+| 사용자 질문 (단계) | 호출한 도구와 인자 | 모델이 밝힌 근거 (`reason`) |
+|---|---|---|
+| "내 데이터 요약을 보고 기간, 개수, 평균 글자 수를 알려줘." (자유) | `get_data_summary {}` | 사용자의 전체 글 기록 요약에서 기간, 개수, 평균 글자 수를 확인하기 위해 |
+| "…어떤 장르가 많고 추세가 어떤지 알려줘. 그리고 '고향'을 소재로 시를 쓰려는데 참고할 작품 하나와 주제 후보 3개를 추천해줘." (주제 선정, 장르: 시) | ① `get_data_summary {"mine": false}`<br>② `search_works {"keyword": "고향", "genre": "시", "limit": 1}` | ① 사용자 데이터의 장르 분포와 전체 추세를 확인하기 위해<br>② '고향' 소재 시의 참고 작품을 찾기 위해 |
+| "아래 글을 퇴고해줘. (원고)" (퇴고) | `analyze_text {"text": "그날 나는 정말 정말 피곤했다. …"}` | 사용자 원고의 문장 길이, 반복어, 접속사 사용을 분석해 퇴고 근거를 마련합니다. |
+
+세 번째 경우, 모델은 측정 결과(문장 4개, 평균 23.0자, 접속사 '그리고' 3회)를 근거로 `원문 → 수정안 (이유)` 형식의 제안 4개를 돌려줬습니다 (스크린샷 `history.png`).
 
 ## 9. (보너스) MCP 서버 — 멀티채널 연동
 
@@ -232,7 +241,7 @@ mcp_server.py ──HTTP──▶ Render 백엔드 (/api/data/summary, /api/data
 Claude Code에 등록:
 
 ```bash
-claude mcp add geulbeot -e GEULBEOT_API_URL={{BACKEND_URL}} -- python backend/mcp_server.py
+claude mcp add geulbeot -e GEULBEOT_API_URL=https://geulbeot-api.onrender.com -- python backend/mcp_server.py
 ```
 
 Claude Desktop (`claude_desktop_config.json`):
@@ -243,15 +252,46 @@ Claude Desktop (`claude_desktop_config.json`):
     "geulbeot": {
       "command": "C:/…/writing-assistant/backend/.venv/Scripts/python.exe",
       "args": ["C:/…/writing-assistant/backend/mcp_server.py"],
-      "env": { "GEULBEOT_API_URL": "{{BACKEND_URL}}" }
+      "env": { "GEULBEOT_API_URL": "https://geulbeot-api.onrender.com" }
     }
   }
 }
 ```
 
-{{MCP_VERIFY}}
+**검증 결과** — [`scripts/mcp_smoke_test.py`](backend/scripts/mcp_smoke_test.py)가 `mcp_server.py`를 stdio로 띄우고 MCP 클라이언트(`ClientSession`)로 **배포된 Render API**를 대상으로 도구를 호출합니다.
 
-## 10. (보너스) 인사이트·UX
+```bash
+cd backend
+python -m scripts.mcp_smoke_test https://geulbeot-api.onrender.com
+```
+
+```text
+서버: geulbeot · 연결 대상 API: https://geulbeot-api.onrender.com
+도구: get_data_summary, get_statistics, search_works, list_my_records, list_conversations, get_conversation, add_writing_record
+- get_data_summary({}) → 성공: {   "period": "1457-01-01 ~ 2026-09-24",   "period_start": "1457-01-01",   "period_end": "2026-09-24",   "count": 1519,   "metrics": {     "total": 5654023,     "average": 3722.2,     "median": 264.0,     "max": 333364, 
+- get_statistics({"group": "decade", "genre": "시"}) → 성공: {   "group": "decade",   "filters": {     "genre": "시"   },   "series": [     {       "period": "1890년대",       "count": 1,       "total": 165,       "average": 165.0     },     {       "period": "1900년대",       "count":
+- search_works({"keyword": "고향", "genre": "시", "limit": 2}) → 성공: {   "date": "1988-01-01",   "title": "고향",   "author": "정지용",   "genre": "시",   "value": 132,   "memo": "《고향》 정지용 — 수록 문집 간행 연도 기준",   "excerpt": "고향에 고향에 돌아와도\n그리던 고향은 아니러뇨.\n\n산꽁이 알을 품고\n뻐꾹이 제철에 울건만,\n\n마음은 제고향 진히지 않고\
+- list_conversations({"limit": 3}) → 성공: {   "id": "nAodYCxlCTO3NIk0nt9v",   "title": "내 데이터 요약을 보고 어떤 장르가 많고 추세가 어떤지…",   "message_count": 2,   "preview": "데이터를 보면 **가장 많은 장르는 시**입니다. 총 **1024건**으로 압도적으로 많고, 다음은 **수필 270건**, **단편소설 122건",   "created_at": "2026
+```
+
+→ 웹 채팅(Function Calling)과 MCP(외부 클라이언트) 두 채널이 **같은 REST API와 같은 Firestore 데이터**를 쓰는 것을 확인했습니다.
+
+## 10. 화면 구성과 디자인
+
+| 경로 | 화면 | 내용 |
+|---|---|---|
+| `#/` | 홈 | "글쓰기를 위한 AI" 소개 + 채팅 카드만. 채팅 카드 안에 주입된 요약 한 줄, 단계 칩, 장르 선택 |
+| `#/history` | 대화 기록 | 저장된 대화 카드 목록 → 불러오기(홈 채팅으로 복원) / 삭제 |
+| `#/records` | 기록 관리 | 기록 추가·수정·삭제 폼, 필터·검색·페이지 목록, CSV/JSON 내보내기 |
+| `#/insights` | 통계 | 요약 타일, 기간별 막대그래프, 장르·작가 분포 |
+
+- 해시 라우팅으로 한 페이지 안에서 화면 전환 (바닐라 JS, 프레임워크 없음)
+- 디자인 토큰: 라임 그린 CTA(`#9fe870`) 하나만 강조색으로 사용, 세이지 캔버스(`#e8ebe6`) 위 흰 카드, 올리브 톤 잉크(`#0e0f0c`), 버튼·카드 반경 24px, 입력창 1px 잉크 테두리
+- 타이포: 헤드라인 900 / 나머지 600·400. 한글 지원을 위해 Inter 기반 한글 폰트 **Pretendard**를 사용
+- 다크 모드: 극성 반전 (잉크 바탕 + 세이지 글자), CTA는 그대로 라임 그린
+- 반응형: 1024px 미만은 소개 → 채팅 세로 배치, 768px 미만은 1열 + 단계 칩 가로 스크롤
+
+## 11. (보너스) 인사이트·UX
 
 - **추가 지표**: 중앙값, 표준편차, 가장 긴/짧은 글, 단계별 분포, `/api/data/statistics`의 기간별 시계열·다작 작가·기록 일수·최장 연속 기록
 - **시각화**: '통계' 탭의 기간별 막대그래프 (연대/연도/월 × 작품 수/평균 글자 수/총 글자 수, 마우스 오버 툴팁, 표로 보기)
@@ -259,7 +299,7 @@ Claude Desktop (`claude_desktop_config.json`):
 - **다크 모드**: 우측 상단 토글 (OS 설정을 따르다가, 직접 고르면 브라우저에 기억)
 - **선택 UI**: 채팅의 글쓰기 단계 칩(자유/주제 선정/구상·개요/초고/퇴고) + 장르 선택 → 시스템 프롬프트의 코칭 가이드가 바뀜
 
-## 11. 로컬 실행 방법
+## 12. 로컬 실행 방법
 
 ### 백엔드
 
@@ -293,7 +333,7 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 
 `public/config.js`의 기본 API 주소는 `http://localhost:8000`입니다.
 
-## 12. 환경 변수
+## 13. 환경 변수
 
 ### 백엔드 (Render / `backend/.env`)
 
@@ -316,22 +356,25 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 
 | 이름 | 필수 | 설명 |
 |---|---|---|
-| `API_BASE_URL` | ✅ | 백엔드 주소 (예: `{{BACKEND_URL}}`). 빌드 때 `build.js`가 `config.js`로 만들어 넣음 |
+| `API_BASE_URL` | ✅ | 백엔드 주소 (예: `https://geulbeot-api.onrender.com`). 빌드 때 `build.js`가 `config.js`로 만들어 넣음 |
 
-## 13. 배포
+## 14. 배포
 
-### 백엔드 — Render
+### 백엔드 — Render (`geulbeot-api`, 싱가포르 리전, Free)
 
-1. GitHub 저장소 연결 → **New Web Service** (또는 `render.yaml` Blueprint)
-2. Root Directory `backend`, Build `pip install -r requirements.txt`, Start `uvicorn main:app --host 0.0.0.0 --port $PORT`
-3. 환경 변수: `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `FIREBASE_SERVICE_ACCOUNT_JSON`, `ALLOWED_ORIGINS`, `PYTHON_VERSION=3.12.8`
-4. 배포 후 `https://<서비스>.onrender.com/docs` 확인
+1. GitHub 저장소 연결 → **New Web Service** (또는 [`render.yaml`](render.yaml) Blueprint)
+2. Build `cd backend && pip install -r requirements.txt` / Start `cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT` (Blueprint 사용 시 `rootDir: backend`)
+3. 환경 변수
+   - 일반 값: `PYTHON_VERSION=3.12.8`, `OPENAI_BASE_URL`, `OPENAI_MODEL`, `OPENAI_MAX_TOKENS`, `STORAGE_BACKEND=firestore`, `ALLOWED_ORIGINS`
+   - **비밀 값은 대시보드에서만 입력**: `OPENAI_API_KEY`, `FIREBASE_SERVICE_ACCOUNT_JSON`(키 JSON을 한 줄로)
+4. `main` 브랜치에 푸시하면 자동 재배포 → `https://geulbeot-api.onrender.com/docs` 확인
 
-### 프론트엔드 — Vercel
+### 프론트엔드 — Vercel (`geulbeot`)
 
-1. 같은 저장소 Import → Root Directory `frontend` (빌드 설정은 `vercel.json`)
-2. 환경 변수 `API_BASE_URL` = Render 주소 → Deploy
-3. 발급된 Vercel 주소를 Render의 `ALLOWED_ORIGINS`에 추가
+1. 같은 저장소 Import (Vercel GitHub 앱 설치 필요) → Root Directory `frontend`, Build `node build.js`, Output `public` ([`vercel.json`](frontend/vercel.json))
+2. 환경 변수 `API_BASE_URL=https://geulbeot-api.onrender.com` → 빌드 때 `build.js`가 `public/config.js`로 만들어 넣음 (값이 없으면 빌드를 실패시켜 잘못된 배포를 막음)
+3. 공개 주소는 프로덕션 도메인 **https://geulbeot-psi.vercel.app** (배포별 주소는 Vercel 배포 보호로 비공개 유지)
+4. 이 주소를 Render의 `ALLOWED_ORIGINS`에 추가 → 다른 출처는 CORS 헤더를 받지 못함 (직접 확인: 허용 출처만 `access-control-allow-origin` 응답)
 
 ### 왜 CORS·환경 변수·키 관리가 필요한가
 
@@ -347,17 +390,31 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 - 전체 데이터 대신 요약만 프롬프트에 넣음
 - 요약·검색용 전체 레코드는 서버 메모리에 캐시하고 쓰기는 바뀐 문서만 반영해 Firestore 읽기 횟수 절약
 
-## 14. 스크린샷
+## 15. 스크린샷
 
-| 데이터 요약이 보이는 채팅 | 데이터 관리 (CRUD) | 대화 기록 불러오기 |
-|---|---|---|
-| ![chat](docs/screenshots/chat.png) | ![data](docs/screenshots/data.png) | ![history](docs/screenshots/history.png) |
+모두 **배포된 사이트**에서 [`docs/capture_screenshots.py`](docs/capture_screenshots.py)로 실제 흐름을 실행하며 찍었습니다.
 
-| 통계·시각화 | 다크 모드 | Swagger UI |
+**① 데이터 요약이 보이는 채팅 화면 (질문 + 답변)** — 채팅 카드 상단 '요약 주입' 줄이 시스템 프롬프트에 들어가는 요약(기간·개수·평균·합계·추세)이고, 답변 위 ⚙ 칩이 호출한 도구와 근거입니다.
+
+![chat](docs/screenshots/chat.png)
+
+**② 데이터 관리 화면 (추가 동작)** — 본문을 붙여넣어 글자 수 자동 계산 → 저장 → 목록 맨 위에 강조 표시 + 저장 알림
+
+![data](docs/screenshots/data.png)
+
+**③ 대화 기록 화면 (불러오기 동작)** — 대화 기록 목록에서 '불러오기'를 누르면 홈 채팅에 이전 대화(퇴고 대화)가 다시 표시됩니다.
+
+| 대화 기록 목록 | 불러온 대화 |
+|---|---|
+| ![history list](docs/screenshots/history_list.png) | ![history](docs/screenshots/history.png) |
+
+**보너스·기타**
+
+| 통계·시각화 | 다크 모드 | Swagger UI (배포 URL) |
 |---|---|---|
 | ![insights](docs/screenshots/insights.png) | ![dark](docs/screenshots/dark.png) | ![swagger](docs/screenshots/swagger.png) |
 
-## 15. 과제 목표별 설명
+## 16. 과제 목표별 설명
 
 | # | 과제 목표 | 이 프로젝트에서의 답 | 근거 |
 |---|---|---|---|
@@ -366,7 +423,7 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 | 3 | Pydantic 검증 이유와 방식 | 잘못된 값이 통계·AI 답변을 오염시키지 않도록 요청 단계에서 차단. `Field` 범위, `Literal` 장르/단계, 미래 날짜·공백 검사 validator, PUT 빈 요청 거부 | §5, [`schemas.py`](backend/app/schemas.py) |
 | 4 | Firestore 저장과 CRUD | `data`(1건 = 1문서), `conversations`(대화 1개 = 1문서 + messages 배열), add/stream/get/update/delete/batch | §6 |
 | 5 | 컨텍스트 주입 원리 | GPT는 DB를 모르므로 매 요청마다 요약을 시스템 메시지에 넣음. 전체 데이터 대신 요약만 넣어 토큰을 아끼고, 세부 정보는 도구로 필요할 때 조회 | §7 |
-| 6 | CORS·환경 변수·키 관리 | 출처가 다른 프론트만 허용, 환경별 값 분리, 키는 서버 환경 변수에만 두고 브라우저에 노출하지 않음 | §13 |
+| 6 | CORS·환경 변수·키 관리 | 출처가 다른 프론트만 허용, 환경별 값 분리, 키는 서버 환경 변수에만 두고 브라우저에 노출하지 않음 | §14 |
 
 ## 요구사항 체크리스트
 
@@ -380,14 +437,14 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 | 대화 API 저장·목록·삭제 + (A) 단건 조회 | §5 |
 | `/api/chat`: 요약 조회 → 프롬프트 삽입 → GPT → 자동 저장 | §7, `tests/test_chat.py` |
 | Render 배포, 배포 URL `/docs`, 콜드스타트 대응 | 맨 위 URL 표, `/health` 깨우기 + 안내 배너 + 로딩 문구 변경 |
-| 바닐라 프론트: 채팅·로딩, 데이터 관리, 대화 기록, 요약 표시 | [`frontend/public`](frontend/public), §14 스크린샷 |
+| 바닐라 프론트: 채팅·로딩, 데이터 관리, 대화 기록, 요약 표시 | [`frontend/public`](frontend/public), §10 화면 구성, §15 스크린샷 |
 | Vercel 배포 + `API_BASE_URL` 환경 변수 | [`frontend/build.js`](frontend/build.js), [`vercel.json`](frontend/vercel.json) |
 | README: 소개·스택·URL·로컬 실행·환경 변수 | 이 문서 |
 | 키를 코드에 노출하지 않음, 입력 검증, 예외 처리 | `.gitignore`, Pydantic, 404/422/429/502/503 처리 |
-| 요청 횟수·토큰 제한, 작은 데이터로 먼저 검증 | §13 비용 관리 |
+| 요청 횟수·토큰 제한, 작은 데이터로 먼저 검증 | §14 비용 관리 |
 | (보너스) Function Calling + MCP + 호출 근거·흐름 문서화 | §8, §9 |
-| (보너스) 추가 지표, 그래프, CSV/JSON 내보내기, 다크 모드 | §10 |
+| (보너스) 추가 지표, 그래프, CSV/JSON 내보내기, 다크 모드 | §11 |
 
-## 16. 데이터 출처 및 라이선스
+## 17. 데이터 출처 및 라이선스
 
 작품 데이터는 [한국어 위키문헌](https://ko.wikisource.org)의 퍼블릭 도메인 저작물(저작권 보호 기간 만료)이며, 각 레코드의 `url`에 원문 링크를 남겼습니다.
