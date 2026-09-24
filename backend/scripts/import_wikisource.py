@@ -8,7 +8,7 @@
 
 날짜(date) 결정 순서 — 앞의 근거가 있으면 그것을 쓴다
   1) 본문 끝의 창작일 (예: 1941. 11. 20.)
-  2) 머리말 설명란의 발표 연·월·일 (예: 《조선일보》 1936년 4월 2일)
+  2) 머리말 설명란의 발표 연·월·일 (예: 《조선일보》 1936년 4월 2일, 〈조선〉 1932.4.) — 월까지 있으면 분류보다 우선
   3) 문서 자신의 'NNNN년 작품' 분류
   4) 저자 문서(저자:○○)의 작품 목록에 적힌 발표 연도 (예: * [[빈처]] (1921년))
   5) (시집 수록작) 수록 시집의 날짜 — 메모에 '수록 문집 … 기준'으로 밝힌다
@@ -274,18 +274,21 @@ def own_date(body: str, categories: list[str], desc: str) -> tuple[str, str] | N
         except ValueError:
             pass
 
-    dm = re.search(r"(1[4-9]\d\d)\s*년\s*(?:(\d{1,2})\s*월)?\s*(?:(\d{1,2})\s*일)?", desc)
-    if dm and (not years or int(dm.group(1)) in years):
-        y, mo, d = int(dm.group(1)), int(dm.group(2) or 0), int(dm.group(3) or 0)
-        if MIN_YEAR <= y <= MAX_YEAR:
-            if 1 <= mo <= 12:
-                if d:
-                    try:
-                        return datetime(y, mo, d).strftime("%Y-%m-%d"), "발표일"
-                    except ValueError:
-                        pass
-                return f"{y:04d}-{mo:02d}-01", "발표 월"
-            return f"{y:04d}-01-01", "발표 연도"
+    # 설명란에 월까지 적힌 출전 날짜(예: '1928년 7월 《조선지광》', '〈조선〉, 1932.4.')는 구체적인 인용이라
+    # 연도 분류와 달라도 우선한다. 연도만 적힌 설명은 분류와 맞을 때만 쓴다.
+    dm = (re.search(r"(1[4-9]\d\d)\s*년\s*(\d{1,2})\s*월\s*(?:(\d{1,2})\s*일)?", desc)
+          or re.search(r"(1[4-9]\d\d)\s*\.\s*(\d{1,2})(?!\d)(?:\s*\.\s*(\d{1,2})(?!\d))?", desc))
+    if dm and MIN_YEAR <= int(dm.group(1)) <= MAX_YEAR and 1 <= int(dm.group(2)) <= 12:
+        y, mo, d = int(dm.group(1)), int(dm.group(2)), int(dm.group(3) or 0)
+        if d:
+            try:
+                return datetime(y, mo, d).strftime("%Y-%m-%d"), "발표일"
+            except ValueError:
+                pass
+        return f"{y:04d}-{mo:02d}-01", "발표 월"
+    ym = re.search(r"(1[4-9]\d\d)\s*년", desc)
+    if ym and (not years or int(ym.group(1)) in years) and MIN_YEAR <= int(ym.group(1)) <= MAX_YEAR:
+        return f"{int(ym.group(1)):04d}-01-01", "발표 연도"
 
     if years:
         return f"{years[0]:04d}-01-01", "발표 연도"
