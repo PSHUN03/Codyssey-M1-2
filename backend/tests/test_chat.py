@@ -92,3 +92,11 @@ def test_analyze_text():
     assert r["sentences"] == 4
     assert r["conjunctions"] == {"그리고": 3}
     assert r["chars_without_spaces"] == len("그날나는정말피곤했다.그리고버스를탔다.그리고창밖을봤다.그리고울었다.")
+
+
+def test_search_works_ranks_title_matches_first(client):
+    for i, (title, memo) in enumerate([("가을밤", "고향 생각이 나는 밤"), ("고향", "고향을 떠나며"), ("먼 길", "메모")]):
+        client.post("/api/data", json={"date": f"2026-01-0{i + 1}", "value": 100, "memo": memo, "title": title,
+                                       "genre": "시"})
+    items = tools.execute("search_works", {"keyword": "고향", "limit": 5})["items"]
+    assert [i["title"] for i in items] == ["고향", "가을밤"]

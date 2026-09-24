@@ -145,7 +145,18 @@ def execute(name: str, args: dict) -> dict:
         limit = min(int(args.pop("limit", 3)), 5)
         keyword = args.pop("keyword", None)
         found = data_service.filter_records(data_service.all_records(), q=keyword, **args)
-        return {"total": len(found), "items": [_record_view(r, excerpt=250) for r in found[-limit:][::-1]]}
+        if keyword:
+            # 관련도: 제목 일치 > 제목 포함 > 지은이 > 메모·본문 발췌 (같은 순위면 날짜가 정확한 작품, 최신순)
+            k = keyword.strip().lower()
+
+            def rank(r):
+                title, author = (r.get("title") or "").lower(), (r.get("author") or "").lower()
+                return 0 if title == k else 1 if k in title else 2 if k in author else 3
+
+            found = sorted(reversed(found), key=rank)
+        else:
+            found = list(reversed(found))
+        return {"total": len(found), "items": [_record_view(r, excerpt=250) for r in found[:limit]]}
     if name == "list_my_records":
         limit = min(int(args.get("limit", 5)), 10)
         _, items = data_service.list_records(mine=True, stage=args.get("stage"), limit=limit)
