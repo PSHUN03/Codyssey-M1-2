@@ -54,7 +54,7 @@
         <div class="hero-copy">
           <span class="badge-positive">글쓰기 전용 AI 코치</span>
           <h1 class="display">주제부터<br />퇴고까지<br />같이 씁니다.</h1>
-          <p class="lead">시·수필·소설·동화·희곡, 장르는 상관없어요. 글벗은 당신의 글쓰기 기록과 한국 근대문학 1,500여 편을 읽고, 지금 쓰는 단계에 맞는 질문과 피드백을 건넵니다.</p>
+          <p class="lead">시·수필·소설·동화·희곡, 장르는 상관없어요. 글벗은 당신의 글쓰기 기록과 한국 문학 작품 1,400여 편을 읽고, 지금 쓰는 단계에 맞는 질문과 피드백을 건넵니다.</p>
           <ol class="steps" aria-label="글쓰기 단계">
             <li><b>01</b>주제 선정</li>
             <li><b>02</b>구상·개요</li>
@@ -65,7 +65,10 @@
 
         <section class="chat-card" aria-label="대화">
           <div class="chat-head">
-            <div id="chat-title" class="chat-title">새 대화</div>
+            <div class="chat-head-row">
+              <div id="chat-title" class="chat-title">새 대화</div>
+              <a id="save-state" class="save-state" href="#/history" hidden></a>
+            </div>
             <a id="summary-strip" class="summary-strip" href="#/insights" title="채팅할 때마다 이 요약이 AI의 시스템 프롬프트에 주입돼요. 눌러서 자세히 보기">
               <span class="strip-label">요약 주입</span><span id="summary-text">데이터 요약을 불러오는 중…</span>
             </a>

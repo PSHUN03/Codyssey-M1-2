@@ -5,7 +5,10 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-Genre = Literal["시", "시조", "수필", "단편소설", "중편소설", "장편소설", "동화", "희곡", "기타"]
+Genre = Literal[
+    "시", "시조", "한시", "가사", "고전시가", "수필", "서간", "평론",
+    "소설", "단편소설", "중편소설", "장편소설", "동화", "희곡", "기타",
+]
 Stage = Literal["주제 선정", "구상·개요", "초고", "퇴고", "완성"]
 ChatStage = Literal["자유", "주제 선정", "구상·개요", "초고", "퇴고"]
 

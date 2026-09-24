@@ -17,3 +17,4 @@ __pycache__/
 Thumbs.db
 .claude/
 backend/data/.wikisource_cache.json
+backend/data/.wikisource_pages.json

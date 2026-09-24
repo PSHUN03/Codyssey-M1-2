@@ -78,6 +78,16 @@ function showLoading() {
 function resetMessages() {
   $$("#messages .msg").forEach((m) => m.remove());
   $("#chat-empty").hidden = false;
+  setSaveState(null);
+}
+
+// 대화는 /api/chat 이 conversations 에 자동 저장한다 → 저장 결과를 채팅 카드에 표시
+function setSaveState(conv) {
+  const el = $("#save-state");
+  if (!conv) { el.hidden = true; return; }
+  el.textContent = `✓ 대화 기록에 저장됨 · 메시지 ${conv.message_count}개`;
+  el.title = `conversations/${conv.id} — 눌러서 대화 기록 보기`;
+  el.hidden = false;
 }
 
 function renderSuggestions() {
@@ -129,6 +139,7 @@ async function openConversation(id) {
     resetMessages();
     $("#chat-title").textContent = conv.title;
     conv.messages.forEach((m) => addMessage(m, { scroll: false }));
+    setSaveState(conv);
     location.hash = "#/";
     requestAnimationFrame(() => ($("#messages").scrollTop = $("#messages").scrollHeight));
     toast(`'${conv.title}' 대화를 불러왔어요.`);
@@ -182,7 +193,8 @@ async function send(text) {
     state.convId = res.conversation_id;
     addMessage({ role: "assistant", content: res.reply, stage: state.stage, tool_calls: res.tool_calls });
     if (isNew) $("#chat-title").textContent = text.length > 30 ? `${text.slice(0, 30)}…` : text;
-    loadConversations();
+    await loadConversations();
+    setSaveState(state.conversations.find((c) => c.id === res.conversation_id) || { id: res.conversation_id, message_count: "" });
   } catch (e) {
     stopLoading();
     addMessage({ role: "assistant", content: `⚠ ${e.message}` }, { error: true });

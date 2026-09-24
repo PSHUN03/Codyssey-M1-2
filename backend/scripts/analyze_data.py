@@ -42,7 +42,7 @@ def main() -> None:
     for r in records:
         by_genre[r["genre"]].append(r["value"])
 
-    precision = Counter(r["memo"].split("— ")[-1].split(" 기준")[0] for r in records)
+    precision = Counter(r.get("basis") or r["memo"].split("— ")[-1].split(" 기준")[0] for r in records)
     authors = Counter(r["author"] for r in records if r.get("author")).most_common(10)
     peak_decade = max(modern, key=lambda kv: len(kv[1]))
 
@@ -71,7 +71,7 @@ def main() -> None:
 |---|---|
 {chr(10).join(f"| {k} | {v:,} |" for k, v in precision.most_common())}
 
-날짜가 연도까지만 알려진 작품은 그해 1월 1일로 둔다. 개별 날짜가 없는 시집 수록작은 시집 간행일을 쓰고 메모에 그렇게 밝혔다.
+날짜 근거 우선순위: 본문 끝 창작일 → 설명란 발표일 → 문서의 연도 분류 → 저자 문서의 작품 연보 → (시집 수록작) 수록 시집 간행일. 연도까지만 알려진 작품은 그해 1월 1일로 둔다. 같은 지은이의 같은 작품이 여러 판본에 있으면 가장 정확하고 이른 날짜 하나만 남겼다 ([`docs/data-verification.md`](data-verification.md) 참고).
 
 ## 3. 연대별 추이 (1900년대 이후, 이전 {pre_modern}편은 고시조 등)
 

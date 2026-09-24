@@ -32,6 +32,13 @@ class Settings:
     firebase_service_account_json: str = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON", "")
     firebase_credentials_path: str = os.getenv("FIREBASE_CREDENTIALS_PATH", "")
 
+    # 원격 MCP(/mcp) 가 받을 Host 헤더 (DNS 리바인딩 방어). 배포 주소와 로컬 개발 주소
+    mcp_allowed_hosts: list[str] = field(
+        default_factory=lambda: _split(
+            os.getenv("MCP_ALLOWED_HOSTS", "geulbeot-api.onrender.com,localhost:*,127.0.0.1:*,testserver")
+        )
+    )
+
     allowed_origins: list[str] = field(
         default_factory=lambda: _split(
             os.getenv("ALLOWED_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500,http://localhost:3000")

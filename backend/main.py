@@ -14,6 +14,7 @@ from google.api_core.exceptions import GoogleAPIError
 
 from app.config import settings
 from app.firebase import FirebaseNotConfigured
+from app.mcp_remote import build_routes as mcp_routes, mcp
 from app.routers import chat, conversations, data
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -29,7 +30,8 @@ async def lifespan(app: FastAPI):
         from app.storage import get_store
 
         logger.info("메모리 저장소 시드: %s", seed(get_store()))
-    yield
+    async with mcp.session_manager.run():  # 원격 MCP(/mcp) 요청 처리기
+        yield
 
 
 app = FastAPI(
@@ -38,7 +40,8 @@ app = FastAPI(
         "주제 선정 → 구상·개요 → 초고 → 퇴고까지, 장르에 상관없이 글쓰기를 돕는 AI 비서의 백엔드입니다.\n\n"
         "- **data**: 날짜별 글쓰기 기록(date, value=글자 수, memo) CRUD + 요약/통계/내보내기\n"
         "- **conversations**: 대화 기록 저장·목록·불러오기·삭제\n"
-        "- **chat**: 데이터 요약을 시스템 프롬프트에 주입한 GPT 대화 (Function Calling 포함)\n\n"
+        "- **chat**: 데이터 요약을 시스템 프롬프트에 주입한 GPT 대화 (Function Calling 포함)\n"
+        "- **MCP**: `POST /mcp` — 같은 기능을 외부 MCP 클라이언트용 도구로 노출 (Streamable HTTP)\n\n"
         "※ 무료 서버(Render)는 15분간 요청이 없으면 잠들어 첫 요청이 30~60초 걸릴 수 있습니다."
     ),
     version="1.0.0",
@@ -92,3 +95,6 @@ def health():
 app.include_router(data.router)
 app.include_router(conversations.router)
 app.include_router(chat.router)
+
+# 원격 MCP 서버: /mcp (MCP 프로토콜 엔드포인트라 Swagger 에는 나타나지 않는다)
+app.router.routes.extend(mcp_routes())

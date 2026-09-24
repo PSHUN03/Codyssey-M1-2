@@ -22,7 +22,7 @@
 - **구상·개요**: 장르별 뼈대(시: 이미지→정서 전환, 수필: 경험→사유, 소설: 인물·갈등·시점)와 **내 평균 분량 기준** 개요
 - **초고**: 막힌 장면의 다음 선택지, 최근 기록을 근거로 한 오늘의 목표 분량
 - **퇴고**: `analyze_text` 도구로 글자 수·문장 길이·반복어·반복 어미를 **실제로 측정한 뒤** `원문 → 수정안 (이유)` 형식으로 피드백
-- **참고 작품**: 위키문헌에서 모은 한국 근대문학(퍼블릭 도메인) 1,518편 중 필요한 예문을 찾아 인용
+- **참고 작품**: 위키문헌에서 모은 한국 근대문학(퍼블릭 도메인) 1,487편 중 필요한 예문을 찾아 인용
 
 ## 2. 데이터: 시계열 글쓰기 기록
 
@@ -35,13 +35,19 @@
 
 데이터는 두 출처가 한 컬렉션에 섞여 있습니다.
 
-1. **위키문헌 작품 1,518편** — [한국어 위키문헌](https://ko.wikisource.org) MediaWiki API로 수집 ([`backend/scripts/import_wikisource.py`](backend/scripts/import_wikisource.py))
+1. **위키문헌 작품 1,487편** — [한국어 위키문헌](https://ko.wikisource.org) MediaWiki API로 수집 ([`backend/scripts/import_wikisource.py`](backend/scripts/import_wikisource.py))
    - 분류(시·시조·수필·단편/중편/장편소설·동화·희곡)와 시집·수필집 하위 작품을 순회
-   - **날짜**: 본문 끝의 창작일(예: `1941. 11. 20.`) → 설명란의 발표 연·월·일 → `NNNN년 작품` 분류 순으로 추출. 개별 날짜가 없는 시집 수록작만 시집 간행일을 쓰고 메모에 `수록 문집 간행 연도 기준`이라고 밝힘. 날짜를 전혀 알 수 없는 작품은 제외
-   - 요청 제한(HTTP 429)을 지키려고 요청 간격 1.2초 + `Retry-After` 재시도, 응답은 로컬 캐시(git 제외)
-   - **글자 수**: 위키 문법·틀·각주를 걷어낸 본문(원문/현대 표기 병기 시 현대 표기)의 공백 제외 글자 수
-   - 기간 1457 ~ 1988년 (1920~40년대가 1,223편)
-   - 장르 분포: 시 1,024 · 수필 269 · 단편소설 122 · 시조 46 · 장편소설 30 · 동화 12 · 중편소설 8 · 희곡 7
+   - **범위**: 장르 분류(시·시조·한시·가사·고전시가·수필·편지·평론·소설류·동화·희곡) + 연도별 작품 분류 전체(세기 → 연대 → 연도 224개) + 시집·수필집 하위 작품
+   - **날짜**: 본문 끝의 창작일(예: `1941. 11. 20.`) → 설명란의 발표 연·월·일 → 문서의 `NNNN년 작품` 분류 → **저자 문서의 작품 연보**(예: `* [[빈처]] (1921년)`) → 수록 시집 간행일(메모에 `수록 문집 간행 연도 기준`으로 표시). 날짜를 알 수 없는 작품은 추측하지 않고 제외
+   - **신뢰성 규칙**
+     - 시집 하위 문서는 '제목' 칸이 시집 이름이라 **'부제' 칸(또는 문서 경로)**에서 작품 제목을 읽음 (예: 「나룻배와 행인」 ← 《님의 침묵》)
+     - 같은 지은이의 같은 작품이 여러 판본에 있으면(초판 시집과 후대 합본 등) **가장 정확하고 이른 날짜 하나**만 남김
+     - 시집이 지은이 **사망 후 10년이 넘어** 나온 후대 판본이면(예: 1988년 선집 《향수》) 그 연도는 발표일이 아니므로 쓰지 않음 (사망 연도는 저자 문서 머리말에서 읽음). 사후 10년 이내의 유고 시집은 `사후 간행 문집`으로 표시
+     - 시집의 서문·발문·후기 등 부속 글은 제외 (다른 사람이 쓴 경우가 많음)
+     - 번역 작품은 역자를 밝히고(《오뇌의 무도》 → `김억(옮김)`), 위키 사용자가 요즘 옮긴 번역문은 제외
+   - **실존 검증**: 전 작품을 문서 번호(pageid)로 다시 조회 → 1,487편 모두 존재·제목 일치 ([`docs/data-verification.md`](docs/data-verification.md), `python -m scripts.verify_works`)
+   - 요청 제한을 지키려고 요청 간격 1.5초 + `Retry-After` 재시도, 위키미디어 정책에 맞는 User-Agent(연락처 포함), 응답은 로컬 캐시(git 제외)
+   - 장르 분포: 시 880 · 수필 295 · 단편소설 168 · 시조 47 · 장편소설 32 · 중편소설 12 · 동화 12 · 서간 10 · 가사 8 · 평론 7 · 희곡 7 · 소설 6 · 한시 2 · 고전시가 1
 2. **내가 쓴 기록** — 웹 화면의 '기록 관리' 탭이나 `POST /api/data`로 추가 (`source = "직접 작성"`)
 
 자세한 분석 결과(연대별·장르별 통계, 날짜 정밀도, 작가 순위)는 [`docs/data-analysis.md`](docs/data-analysis.md) — `python -m scripts.analyze_data`가 서비스와 같은 요약 함수로 생성합니다.
@@ -155,7 +161,7 @@ writing-assistant/
 | Delete | `document(id).delete()` — 없는 ID는 404 |
 | 대량 적재 | `db.batch()` 400건씩 `commit()` (시드 스크립트) |
 
-- 이 서버를 거친 쓰기는 **바뀐 문서만 캐시에 반영**해서 다음 요약·채팅이 곧바로 최신 데이터를 보면서도, 기록 1건 저장에 1,518건을 다시 읽지 않습니다 (Firestore 무료 한도: 하루 읽기 5만 회). 캐시는 1시간마다 새로 읽습니다.
+- 이 서버를 거친 쓰기는 **바뀐 문서만 캐시에 반영**해서 다음 요약·채팅이 곧바로 최신 데이터를 보면서도, 기록 1건 저장에 1,487건을 다시 읽지 않습니다 (Firestore 무료 한도: 하루 읽기 5만 회). 캐시는 1시간마다 새로 읽습니다.
 - 서비스 계정 키는 `FIREBASE_SERVICE_ACCOUNT_JSON`(배포) 또는 `FIREBASE_CREDENTIALS_PATH`(로컬)로만 받고, Firestore 보안 규칙은 **프로덕션 모드(클라이언트 직접 접근 차단)** 입니다. 브라우저는 반드시 백엔드 API를 거칩니다.
 
 ## 7. 컨텍스트 주입과 AI 호출 흐름
@@ -191,7 +197,7 @@ POST /api/chat
 - 구조 → 문단 → 문장 → 단어 순서로 점검 …
 ```
 
-**원리**: GPT는 우리 DB를 모르므로 매 요청마다 "지금 이 사용자의 데이터는 이렇다"는 사실을 시스템 메시지로 넣어 줍니다. 전체 레코드(1,518+건)를 넣으면 토큰이 크게 늘어나므로 **요약만** 넣고, 더 자세한 정보(특정 작품 본문, 기간별 통계, 이전 대화)는 모델이 필요할 때 도구로 가져오게 했습니다.
+**원리**: GPT는 우리 DB를 모르므로 매 요청마다 "지금 이 사용자의 데이터는 이렇다"는 사실을 시스템 메시지로 넣어 줍니다. 전체 레코드(1,487+건)를 넣으면 토큰이 크게 늘어나므로 **요약만** 넣고, 더 자세한 정보(특정 작품 본문, 기간별 통계, 이전 대화)는 모델이 필요할 때 도구로 가져오게 했습니다.
 
 ## 8. (보너스) Function Calling — 어떤 근거로 어떤 도구를 부르나
 
@@ -227,54 +233,40 @@ POST /api/chat
 
 ## 9. (보너스) MCP 서버 — 멀티채널 연동
 
-[`backend/mcp_server.py`](backend/mcp_server.py)는 같은 기능을 **MCP 도구**로 노출합니다. DB에 직접 붙지 않고 **배포된 REST API를 호출**하므로 외부 클라이언트도 웹과 똑같은 검증·저장 규칙을 거칩니다.
+같은 기능을 **MCP 도구**로도 노출합니다. 두 가지 방식을 모두 제공하고, 둘 다 실제 MCP 클라이언트로 검증했습니다.
+
+| 방식 | 주소 / 실행 | 동작 |
+|---|---|---|
+| **원격 (Streamable HTTP)** | `https://geulbeot-api.onrender.com/mcp` | 배포된 백엔드 안에서 실행 ([`app/mcp_remote.py`](backend/app/mcp_remote.py)). 웹 채팅의 Function Calling 과 **같은 서비스 함수**를 호출. 설치 없이 URL만으로 연결 |
+| 로컬 (stdio) | `python backend/mcp_server.py` | 내 PC에서 실행되는 MCP 서버가 배포된 **REST API를 호출** ([`mcp_server.py`](backend/mcp_server.py)) |
 
 ```
-Claude Desktop / Claude Code (MCP 클라이언트)
-   │ stdio (JSON-RPC)
-   ▼
-mcp_server.py ──HTTP──▶ Render 백엔드 (/api/data/summary, /api/data, /api/conversations …) ──▶ Firestore
+외부 MCP 클라이언트 (Claude · ChatGPT 커넥터, Claude Code, MCP Inspector …)
+   │
+   ├─ Streamable HTTP ──▶ Render /mcp ──▶ services.tools / data_service ──▶ Firestore
+   │
+   └─ stdio ──▶ mcp_server.py ──HTTP──▶ Render /api/* ──▶ Firestore
 ```
 
-도구: `get_data_summary`, `get_statistics`, `search_works`, `list_my_records`, `list_conversations`, `get_conversation`, `add_writing_record`
+도구: 원격 8개 — `get_data_summary`, `get_statistics`, `search_works`, `list_my_records`, `list_conversations`, `get_conversation`, `analyze_text`, `add_writing_record` / 로컬 stdio 7개 (REST API 에 없는 `analyze_text` 제외)
 
-Claude Code에 등록:
+- 원격 MCP는 **DNS 리바인딩 방어**로 허용된 Host(`MCP_ALLOWED_HOSTS`)만 받고, 무료 서버의 재시작·슬립에 대비해 세션 없이(stateless) 요청마다 처리합니다.
+- 연결 예시
+  - Claude Code: `claude mcp add --transport http geulbeot https://geulbeot-api.onrender.com/mcp`
+  - Claude.ai / ChatGPT: 커넥터(사용자 지정 MCP) 추가에서 위 URL 입력
+  - 로컬 stdio: `claude mcp add geulbeot -e GEULBEOT_API_URL=https://geulbeot-api.onrender.com -- python backend/mcp_server.py`
 
-```bash
-claude mcp add geulbeot -e GEULBEOT_API_URL=https://geulbeot-api.onrender.com -- python backend/mcp_server.py
-```
-
-Claude Desktop (`claude_desktop_config.json`):
-
-```json
-{
-  "mcpServers": {
-    "geulbeot": {
-      "command": "C:/…/writing-assistant/backend/.venv/Scripts/python.exe",
-      "args": ["C:/…/writing-assistant/backend/mcp_server.py"],
-      "env": { "GEULBEOT_API_URL": "https://geulbeot-api.onrender.com" }
-    }
-  }
-}
-```
-
-**검증 결과** — [`scripts/mcp_smoke_test.py`](backend/scripts/mcp_smoke_test.py)가 `mcp_server.py`를 stdio로 띄우고 MCP 클라이언트(`ClientSession`)로 **배포된 Render API**를 대상으로 도구를 호출합니다.
+**검증 결과** — [`scripts/mcp_smoke_test.py`](backend/scripts/mcp_smoke_test.py)가 MCP SDK의 `ClientSession`으로 연결해 도구를 호출합니다 (주소가 `/mcp`로 끝나면 원격, 아니면 stdio).
 
 ```bash
 cd backend
-python -m scripts.mcp_smoke_test https://geulbeot-api.onrender.com
+python -m scripts.mcp_smoke_test https://geulbeot-api.onrender.com/mcp   # 원격
+python -m scripts.mcp_smoke_test https://geulbeot-api.onrender.com       # 로컬 stdio
 ```
 
-```text
-서버: geulbeot · 연결 대상 API: https://geulbeot-api.onrender.com
-도구: get_data_summary, get_statistics, search_works, list_my_records, list_conversations, get_conversation, add_writing_record
-- get_data_summary({}) → 성공: {   "period": "1457-01-01 ~ 2026-09-24",   "period_start": "1457-01-01",   "period_end": "2026-09-24",   "count": 1519,   "metrics": {     "total": 5654023,     "average": 3722.2,     "median": 264.0,     "max": 333364, 
-- get_statistics({"group": "decade", "genre": "시"}) → 성공: {   "group": "decade",   "filters": {     "genre": "시"   },   "series": [     {       "period": "1890년대",       "count": 1,       "total": 165,       "average": 165.0     },     {       "period": "1900년대",       "count":
-- search_works({"keyword": "고향", "genre": "시", "limit": 2}) → 성공: {   "date": "1988-01-01",   "title": "고향",   "author": "정지용",   "genre": "시",   "value": 132,   "memo": "《고향》 정지용 — 수록 문집 간행 연도 기준",   "excerpt": "고향에 고향에 돌아와도\n그리던 고향은 아니러뇨.\n\n산꽁이 알을 품고\n뻐꾹이 제철에 울건만,\n\n마음은 제고향 진히지 않고\
-- list_conversations({"limit": 3}) → 성공: {   "id": "nAodYCxlCTO3NIk0nt9v",   "title": "내 데이터 요약을 보고 어떤 장르가 많고 추세가 어떤지…",   "message_count": 2,   "preview": "데이터를 보면 **가장 많은 장르는 시**입니다. 총 **1024건**으로 압도적으로 많고, 다음은 **수필 270건**, **단편소설 122건",   "created_at": "2026
-```
+{{MCP_RESULTS}}
 
-→ 웹 채팅(Function Calling)과 MCP(외부 클라이언트) 두 채널이 **같은 REST API와 같은 Firestore 데이터**를 쓰는 것을 확인했습니다.
+→ 웹 채팅(Function Calling), 원격 MCP, 로컬 MCP 세 채널이 **같은 Firestore 데이터**를 보는 것을 확인했습니다. 원격 `/mcp`는 `tests/test_mcp_remote.py`에서 JSON-RPC 메시지(initialize → tools/list → tools/call)와 허용되지 않은 Host 거부까지 자동 테스트합니다.
 
 ## 10. 화면 구성과 디자인
 
@@ -386,7 +378,7 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 
 - **요청 횟수 제한**: `/api/chat`은 IP별 분당 6회, 서버 전체 하루 300회를 넘으면 `429`와 안내 문구를 돌려줌 ([`app/rate_limit.py`](backend/app/rate_limit.py))
 - **토큰 제한**: `max_completion_tokens`(기본 1200), 도구 반복 최대 3회, 이전 대화 10개까지만 전송
-- **작은 데이터로 먼저 검증**: Firestore에 `seed_firestore --limit 20`으로 20건만 넣고 채팅 2회(요약 질문, 퇴고 요청)로 흐름을 확인한 뒤 `--reset`으로 1,518건 전체 적재
+- **작은 데이터로 먼저 검증**: Firestore에 `seed_firestore --limit 20`으로 20건만 넣고 채팅 2회(요약 질문, 퇴고 요청)로 흐름을 확인한 뒤 `--reset`으로 전체 적재 (현재 1,487건)
 - 전체 데이터 대신 요약만 프롬프트에 넣음
 - 요약·검색용 전체 레코드는 서버 메모리에 캐시하고 쓰기는 바뀐 문서만 반영해 Firestore 읽기 횟수 절약
 
@@ -418,7 +410,7 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 
 | # | 과제 목표 | 이 프로젝트에서의 답 | 근거 |
 |---|---|---|---|
-| 1 | 시계열 분석 → 요약 → 서비스 활용 | 위키문헌 1,518편 + 내 기록을 날짜순으로 정렬해 통계·추세를 계산하고, 그 요약을 채팅 프롬프트·요약 패널·통계 탭이 함께 씀 | §2, [`summary_service.py`](backend/app/services/summary_service.py), [`docs/data-analysis.md`](docs/data-analysis.md) |
+| 1 | 시계열 분석 → 요약 → 서비스 활용 | 위키문헌 1,487편 + 내 기록을 날짜순으로 정렬해 통계·추세를 계산하고, 그 요약을 채팅 프롬프트·요약 패널·통계 탭이 함께 씀 | §2, [`summary_service.py`](backend/app/services/summary_service.py), [`docs/data-analysis.md`](docs/data-analysis.md) |
 | 2 | 라우터/서비스 분리 기준 | 라우터 = HTTP 규약(경로·쿼리·상태 코드), 서비스 = 비즈니스 로직, storage = DB. 채팅과 도구가 REST와 같은 서비스 함수를 재사용 | §4 |
 | 3 | Pydantic 검증 이유와 방식 | 잘못된 값이 통계·AI 답변을 오염시키지 않도록 요청 단계에서 차단. `Field` 범위, `Literal` 장르/단계, 미래 날짜·공백 검사 validator, PUT 빈 요청 거부 | §5, [`schemas.py`](backend/app/schemas.py) |
 | 4 | Firestore 저장과 CRUD | `data`(1건 = 1문서), `conversations`(대화 1개 = 1문서 + messages 배열), add/stream/get/update/delete/batch | §6 |
@@ -430,11 +422,11 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 | 요구사항 | 구현 위치 / 확인 방법 |
 |---|---|
 | Python 3.10+ venv, fastapi·uvicorn·firebase-admin·openai·python-dotenv | [`requirements.txt`](backend/requirements.txt), Render는 Python 3.12.8 |
-| 100개 이상 시계열 + 요약 정보 | 1,518건, `GET /api/data/summary` |
+| 100개 이상 시계열 + 요약 정보 | 1,487건 (전 작품 위키문헌 실존 재조회: [`docs/data-verification.md`](docs/data-verification.md)), `GET /api/data/summary` |
 | CORS, `uvicorn main:app --reload`, `/docs` | [`main.py`](backend/main.py) |
 | Firestore, 키 환경 변수 관리, `data`·`conversations` 컬렉션 | §6 |
 | 데이터 API 5개 (CRUD 4 + summary) | §5 |
-| 대화 API 저장·목록·삭제 + (A) 단건 조회 | §5 |
+| 대화 API 저장·목록·삭제 + (A) 단건 조회 | §5 — 채팅 카드에 "✓ 대화 기록에 저장됨" 표시로 저장 결과 확인 |
 | `/api/chat`: 요약 조회 → 프롬프트 삽입 → GPT → 자동 저장 | §7, `tests/test_chat.py` |
 | Render 배포, 배포 URL `/docs`, 콜드스타트 대응 | 맨 위 URL 표, `/health` 깨우기 + 안내 배너 + 로딩 문구 변경 |
 | 바닐라 프론트: 채팅·로딩, 데이터 관리, 대화 기록, 요약 표시 | [`frontend/public`](frontend/public), §10 화면 구성, §15 스크린샷 |
@@ -442,7 +434,7 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 | README: 소개·스택·URL·로컬 실행·환경 변수 | 이 문서 |
 | 키를 코드에 노출하지 않음, 입력 검증, 예외 처리 | `.gitignore`, Pydantic, 404/422/429/502/503 처리 |
 | 요청 횟수·토큰 제한, 작은 데이터로 먼저 검증 | §14 비용 관리 |
-| (보너스) Function Calling + MCP + 호출 근거·흐름 문서화 | §8, §9 |
+| (보너스) Function Calling + MCP + 호출 근거·흐름 문서화 | §8, §9 — 원격 MCP `/mcp`(배포 URL) + 로컬 stdio, 두 방식 모두 MCP 클라이언트로 검증 |
 | (보너스) 추가 지표, 그래프, CSV/JSON 내보내기, 다크 모드 | §11 |
 
 ## 17. 데이터 출처 및 라이선스

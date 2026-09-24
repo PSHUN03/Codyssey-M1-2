@@ -226,7 +226,13 @@ main { flex: 1; }
 }
 .chat-head { padding: var(--s-xl) var(--s-xl) var(--s-md); display: flex; flex-direction: column; gap: var(--s-md); border-bottom: 1px solid var(--divider); }
 .chat-head-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-md); }
-.chat-title { font-weight: 600; font-size: 20px; line-height: 28px; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-head-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-md); min-width: 0; }
+.save-state {
+  flex: none; font-size: 12px; font-weight: 600; line-height: 16px; text-decoration: none; white-space: nowrap;
+  color: var(--positive-deep); background: var(--primary-pale); padding: 4px 10px; border-radius: var(--r-pill);
+}
+.save-state:hover { text-decoration: underline; }
+.chat-title { min-width: 0; font-weight: 600; font-size: 20px; line-height: 28px; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .summary-strip {
   display: flex; align-items: baseline; gap: var(--s-sm); text-decoration: none;
   background: var(--primary-pale); color: var(--positive-deep); border-radius: var(--r-md);
