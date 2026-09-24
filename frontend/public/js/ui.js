@@ -91,10 +91,11 @@ export function markdown(src) {
       if (list !== "ul") { closeList(); out.push("<ul>"); list = "ul"; }
       out.push(`<li>${inline(m[1])}</li>`); continue;
     }
-    if ((m = t.match(/^\d+[.)]\s+(.*)$/))) {
+    if ((m = t.match(/^(\d+)[.)]\s+(.*)$/))) {
       flushPara();
-      if (list !== "ol") { closeList(); out.push("<ol>"); list = "ol"; }
-      out.push(`<li>${inline(m[1])}</li>`); continue;
+      // 번호 항목 사이에 글머리표가 끼어 목록이 끊겨도 원래 번호를 이어 가도록 start 지정
+      if (list !== "ol") { closeList(); out.push(`<ol start="${Number(m[1])}">`); list = "ol"; }
+      out.push(`<li>${inline(m[2])}</li>`); continue;
     }
     if (t === "---") { flushPara(); closeList(); continue; }
     closeList();

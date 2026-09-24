@@ -78,7 +78,9 @@ class FirestoreStore:
     def clear(self, collection: str, where: tuple[str, str] | None = None) -> int:
         query = self._col(collection)
         if where:
-            query = query.where(field_path=where[0], op_string="==", value=where[1])
+            from google.cloud.firestore_v1.base_query import FieldFilter
+
+            query = query.where(filter=FieldFilter(where[0], "==", where[1]))
         refs = [d.reference for d in query.stream()]
         for i in range(0, len(refs), 400):
             batch = self.db.batch()
