@@ -14,7 +14,10 @@
   5) (시집 수록작) 수록 시집의 날짜 — 메모에 '수록 문집 … 기준'으로 밝힌다
      단, 시집이 지은이 사망 후에 나왔으면 '사후 간행 문집'으로 표시하고, 사망 후 10년이 넘어 나온
      후대 판본(재간행·선집)의 연도는 발표일로 볼 수 없어 쓰지 않는다.
-  날짜를 알 수 없는 작품은 넣지 않는다.
+  날짜를 알 수 없는 작품은 시계열(records)에 넣지 않고 '참고 작품 서재'(library)에 따로 담는다.
+  (AI 작품 검색에는 쓰이지만 요약·추세 통계에는 들어가지 않는다)
+
+본문이 스캔본 페이지에서 불러오는 형식(<pages index=…>)이면 위키문헌이 렌더링한 본문을 받아 글자를 센다.
 
 같은 지은이의 같은 제목 작품이 여러 문서(초판 시집과 후대 합본 등)에 있으면 날짜 근거가 가장
 정확하고 가장 이른 것 하나만 남긴다.
@@ -39,6 +42,8 @@ import urllib.parse
 import urllib.request
 from collections import defaultdict
 from datetime import datetime, timezone
+from html import unescape
+from html.parser import HTMLParser
 from pathlib import Path
 
 API = "https://ko.wikisource.org/w/api.php"
@@ -249,6 +254,78 @@ def clean_body(wikitext: str) -> str:
     return text.strip()
 
 
+class _BodyText(HTMLParser):
+    """렌더링된 HTML 에서 본문 글자만 모은다 (머리말 상자·쪽번호·각주·스타일은 통째로 건너뜀)."""
+
+    SKIP_CLASSES = ("ws-noexport", "noprint", "ws-header", "wst-header", "mw-editsection", "reference",
+                    "mw-references-wrap", "pagenum", "ws-pagenum", "mw-cite-backlink", "licenseContainer",
+                    "messagebox", "ambox", "metadata")  # 안내 상자(옛한글·이체자 안내 등)
+    BLOCK = {"p", "div", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "dd", "dt"}
+    VOID = {"br", "img", "hr", "wbr", "meta", "link", "input"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.out: list[str] = []
+        self.skip_depth = 0
+        self.stack: list[bool] = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.VOID:
+            if not self.skip_depth and tag == "br":
+                self.out.append("\n")
+            return
+        classes = (dict(attrs).get("class") or "").split()
+        skip = tag in ("style", "script") or any(c in classes for c in self.SKIP_CLASSES)
+        self.stack.append(skip)
+        if skip:
+            self.skip_depth += 1
+        elif not self.skip_depth and tag in self.BLOCK:
+            self.out.append("\n")
+
+    def handle_endtag(self, tag):
+        if tag in self.VOID or not self.stack:
+            return
+        if self.stack.pop():
+            self.skip_depth -= 1
+        elif not self.skip_depth and tag in self.BLOCK:
+            self.out.append("\n")
+
+    def handle_data(self, data):
+        if not self.skip_depth:
+            self.out.append(data)
+
+
+_rendered_log: list[str] = []
+
+
+def rendered_text(title: str, page: dict) -> str:
+    """스캔본(<pages index=…>)에서 본문을 불러오는 문서: 위키문헌이 렌더링한 본문을 텍스트로."""
+    if "rendered" not in page:
+        r = api({"action": "parse", "page": page.get("title", title), "prop": "text",
+                 "disableeditsection": 1, "disabletoc": 1}, use_cache=False)
+        page["rendered"] = (r.get("parse") or {}).get("text", "")
+        _rendered_log.append(title)
+        if len(_rendered_log) % 20 == 0:
+            print(f"  - 스캔본 본문 {len(_rendered_log)}건")
+            save_caches()
+    # 라이선스·저작권·각주 절부터는 본문이 아니다
+    html = re.split(r'<h2 id="(?:라이선스|저작권|각주)"', page["rendered"])[0]
+    parser = _BodyText()
+    parser.feed(html)
+    text = unescape("".join(parser.out)).replace("\u200b", "")
+    text = re.sub(r"[ \t\u3000]+", " ", text)
+    return re.sub(r"\n\s*\n+", "\n\n", text).strip()
+
+
+def work_body(title: str, page: dict) -> str:
+    """작품 본문. 위키 문법 본문이 비어 있고 스캔본을 불러오는 문서면 렌더링된 본문을 쓴다."""
+    content = page.get("content") or ""
+    body = clean_body(content)
+    if len(re.sub(r"\s", "", body)) < MIN_CHARS and "<pages" in content:
+        body = rendered_text(title, page)
+    return body
+
+
 def is_index_page(wikitext: str) -> bool:
     body = re.sub(r"\{\{.*?\}\}", "", wikitext, flags=re.S)
     lines = [l for l in body.splitlines() if l.strip() and not l.startswith("[[분류")]
@@ -339,10 +416,12 @@ def pick_genre(categories: list[str], fallback: str | None) -> str | None:
     return fallback
 
 
-def to_record(title: str, page: dict, genre: str, date: tuple[str, str], parent_title: str | None,
-              parent_author: str, translated: bool = False, parent_translator: str = "") -> dict | None:
+def to_record(title: str, page: dict, genre: str, date: tuple[str, str] | None, parent_title: str | None,
+              parent_author: str, translated: bool = False, parent_translator: str = "",
+              note: str = "") -> dict | None:
+    """date 가 None 이면 '발표 시기 미상' 작품(참고 작품 서재용)으로 만든다."""
     content = page.get("content") or ""
-    body = clean_body(content)
+    body = work_body(title, page)
     chars = len(re.sub(r"\s", "", body))
     if chars < MIN_CHARS:
         return None
@@ -363,7 +442,7 @@ def to_record(title: str, page: dict, genre: str, date: tuple[str, str], parent_
     if translated:
         author = f"{author}(옮김)" if author else "역자 미상"
     desc = header_field(content, "설명")
-    date_str, basis = date
+    date_str, basis = date if date else (None, "발표 시기 미상")
 
     memo = f"《{work_title}》 {author or '작자 미상'}" + (f" · {translator} 옮김" if translator else "") + f" — {basis} 기준"
     if parent_title:
@@ -371,6 +450,8 @@ def to_record(title: str, page: dict, genre: str, date: tuple[str, str], parent_
         memo += f" · 《{collection}》 수록"
         if translated:
             memo += " (번역 시집)"
+    if note:
+        memo += f" · {note}"
     if desc:
         memo += f" · {desc[:60]}"
     return {
@@ -443,13 +524,14 @@ def main() -> None:
 
     def resolve(title: str, page: dict) -> tuple[str, str] | None:
         content = page.get("content") or ""
-        d = own_date(clean_body(content), page["categories"], header_field(content, "설명"))
+        d = own_date(work_body(title, page), page["categories"], header_field(content, "설명"))
         if d:
             return d
         y = by_author.get(title) or by_author.get(title.replace("_", " "))
         return (f"{y:04d}-01-01", "저자 문서 발표 연도") if y else None
 
     records: list[dict] = []
+    library: list[dict] = []   # 발표 시기 미상 (참고 작품 서재)
     skipped = defaultdict(int)
     for title, page in pages.items():
         content = page.get("content") or ""
@@ -461,15 +543,12 @@ def main() -> None:
             skipped["장르 없음"] += 1
             continue
         date = resolve(title, page)
-        if not date:
-            skipped["날짜 없음"] += 1
-            continue
         parent = title.rsplit("/", 1)[0] if "/" in title else None  # 분류에 직접 걸린 하위 문서
         rec = to_record(title, page, genre, date, parent, "")
         if rec:
-            records.append(rec)
+            (records if date else library).append(rec)
         else:
-            skipped["본문 짧음"] += 1
+            skipped["본문 없음·부속 글·현대 번역"] += 1
 
     for col_title, col_page in col_pages.items():
         col_content = col_page.get("content") or ""
@@ -484,23 +563,24 @@ def main() -> None:
                 continue
             genre = pick_genre(page["categories"], collections[col_title])
             date = resolve(title, page)
+            note = ""
             if not date and col_date:
                 death = deaths.get(author_page(content) or author_page(col_content) or "")
                 col_year = int(col_date[0][:4])
                 if death and col_year - death > POSTHUMOUS_LIMIT:
-                    skipped["후대 판본 연도뿐"] += 1
-                    continue
-                label = "사후 간행 문집" if death and col_year > death else "수록 문집"
-                date = (col_date[0], f"{label} {col_date[1].replace('발표', '간행')}")
-            if not date:
-                skipped["날짜 없음"] += 1
-                continue
+                    # 후대 판본의 연도는 발표일이 아니다 → 발표 시기 미상으로 서재에 담는다
+                    note = f"수록 판본은 {col_year}년 후대 간행본"
+                else:
+                    label = "사후 간행 문집" if death and col_year > death else "수록 문집"
+                    date = (col_date[0], f"{label} {col_date[1].replace('발표', '간행')}")
             translated = (col_title in TRANSLATED_COLLECTIONS or "번역" in col_title
                           or "번역" in col_page["categories"])
             rec = to_record(title, page, genre, date, col_title, col_author, translated,
-                            header_field(col_content, "역자"))
+                            header_field(col_content, "역자"), note)
             if rec:
-                records.append(rec)
+                (records if date else library).append(rec)
+            else:
+                skipped["본문 없음·부속 글·현대 번역"] += 1
 
     by_pageid: dict[int, dict] = {}
     for r in records:  # 넘겨주기로 같은 문서를 가리키면 날짜 근거가 더 정확하고 이른 쪽을 남긴다
@@ -509,6 +589,18 @@ def main() -> None:
             by_pageid[r["pageid"]] = r
     records = list(by_pageid.values())
     records, dup = dedupe(records)
+
+    # 서재: 이미 날짜와 함께 수록된 작품(다른 판본)은 빼고, 서재 안의 중복은 본문이 긴 쪽 하나로
+    dated_keys = {(r["author"], norm_title(r["title"])) for r in records}
+    dated_ids = {r["pageid"] for r in records}
+    shelf: dict[tuple, dict] = {}
+    for r in library:
+        if (r["author"], norm_title(r["title"])) in dated_keys or r["pageid"] in dated_ids:
+            continue
+        key = (r["author"], norm_title(r["title"]), r["genre"])
+        if key not in shelf or r["value"] > shelf[key]["value"]:
+            shelf[key] = r
+    library = sorted(shelf.values(), key=lambda r: (r["author"], r["title"]))
     save_caches()
 
     result = sorted(records, key=lambda r: (r["date"], r["title"]))
@@ -516,7 +608,9 @@ def main() -> None:
         "source": "한국어 위키문헌 (https://ko.wikisource.org) — 퍼블릭 도메인 저작물",
         "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "count": len(result),
+        "library_count": len(library),
         "records": result,
+        "library": library,
     }, ensure_ascii=False, indent=1), encoding="utf-8")
 
     by_genre: dict[str, int] = defaultdict(int)
@@ -524,7 +618,10 @@ def main() -> None:
     for r in result:
         by_genre[r["genre"]] += 1
         by_basis[r["basis"]] += 1
-    print(f"\n완료: {len(result)}편 → {OUT_PATH}  (중복 제거 {dup}편)")
+    print(f"\n완료: 시계열 {len(result)}편 + 참고 작품 서재(발표 시기 미상) {len(library)}편 → {OUT_PATH}"
+          f"  (중복 제거 {dup}편, 스캔본 본문 {len(_rendered_log)}건 새로 받음)")
+    print("서재 장르별:", dict(defaultdict(int, {g: sum(1 for r in library if r["genre"] == g)
+                                              for g in {r["genre"] for r in library}})))
     print("제외:", dict(skipped))
     print("장르별:", dict(by_genre))
     print("날짜 근거:", dict(by_basis))

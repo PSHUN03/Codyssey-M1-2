@@ -4,7 +4,7 @@ SYSTEM_TEMPLATE = """당신은 '글벗'이라는 글쓰기 코치 AI입니다.
 시·시조·수필·소설·동화·희곡 등 장르에 관계없이 [주제 선정 → 구상·개요 → 초고 → 퇴고] 전 과정을 돕습니다.
 
 [사용자 데이터 요약]
-글 기록 DB에는 사용자가 직접 기록한 글쓰기 로그와, 위키문헌에서 가져온 한국 근대문학(퍼블릭 도메인) 작품이 함께 들어 있습니다.
+글 기록 DB에는 사용자가 직접 기록한 글쓰기 로그와, 위키문헌에서 가져온 한국 문학 작품(퍼블릭 도메인, 15세기 시조~20세기 근대문학)이 함께 들어 있습니다.
 글자 수(value)는 공백 제외 기준입니다.
 - 데이터 기간: {period}
 - 총 레코드: {count}개
@@ -13,6 +13,7 @@ SYSTEM_TEMPLATE = """당신은 '글벗'이라는 글쓰기 코치 AI입니다.
 - 최근 트렌드: {trend}
 - 장르 분포: {by_genre}
 - 출처 분포: {by_source}
+- 참고 작품 서재: 발표 시기를 확인할 수 없는 실존 작품 {library_count}편 (위 통계에는 포함되지 않음, search_works 로 검색 가능)
 
 [사용자가 직접 쓴 기록]
 - 기간: {mine_period} / {mine_count}건 / 평균 {mine_average}자
@@ -28,6 +29,7 @@ SYSTEM_TEMPLATE = """당신은 '글벗'이라는 글쓰기 코치 AI입니다.
 2. 사용자의 글을 대신 완성하기보다 스스로 쓰도록 질문·예시·구체적 피드백을 주세요. 사용자가 원하면 예시 문장을 제시해도 됩니다.
 3. 예문으로 작품을 인용할 때는 search_works 로 찾은 작품만 쓰고, 《제목》과 지은이를 밝히세요.
 4. 퇴고 피드백 전에는 analyze_text 로 원고를 측정한 뒤, '원문 → 수정안 (이유)' 형식으로 제안하세요.
+   사용자가 저장해 둔 자기 글을 언급하면 search_works(mine=true)로 찾고 read_work 로 본문을 읽으세요.
 5. 한국어로, 핵심부터, 필요할 때만 목록을 써서 800자 안팎으로 답하세요.
 """
 
@@ -73,7 +75,7 @@ def _fmt_brief(b: dict | None) -> str:
     return f"{b['date']} {title}{author} [{b['genre']}{stage}] {b['value']:,}자"
 
 
-def build_system_prompt(summary: dict, mine: dict, stage: str, genre: str | None) -> str:
+def build_system_prompt(summary: dict, mine: dict, stage: str, genre: str | None, library_count: int = 0) -> str:
     m = summary.get("metrics") or {}
     mm = mine.get("metrics") or {}
     return SYSTEM_TEMPLATE.format(
@@ -88,6 +90,7 @@ def build_system_prompt(summary: dict, mine: dict, stage: str, genre: str | None
         trend=summary["trend"],
         by_genre=_fmt_groups(summary["by_genre"]),
         by_source=_fmt_groups(summary["by_source"]),
+        library_count=f"{library_count:,}",
         mine_period=mine["period"],
         mine_count=mine["count"],
         mine_average=f"{mm.get('average', 0):,.0f}",

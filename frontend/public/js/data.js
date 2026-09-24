@@ -37,15 +37,38 @@ function row(r) {
     </tr>`;
 }
 
+function libraryRow(w) {
+  const author = w.author ? `<span class="a">${esc(w.author)}</span>` : "";
+  return `
+    <tr data-id="${esc(w.id)}">
+      <td class="cell-date">발표 시기 미상</td>
+      <td class="cell-title">
+        <span class="t">${esc(w.title)}</span>${author}
+        <a class="tag src" href="${esc(w.url || "#")}" target="_blank" rel="noopener">위키문헌</a>
+        <span class="m">${esc(w.memo)}</span>
+      </td>
+      <td><span class="tag">${esc(w.genre)}</span></td>
+      <td></td>
+      <td class="num">${fmt(w.value)}</td>
+      <td><span class="caption">읽기 전용</span></td>
+    </tr>`;
+}
+
+const isLibrary = () => $("#f-mine").value === "library";
+
 export async function loadList() {
   const tbody = $("#data-rows");
   try {
-    const res = await api.listData({ ...filters(), limit: PAGE_SIZE, offset: state.offset });
+    const f = filters();
+    const res = isLibrary()
+      ? await api.listLibrary({ q: f.q, genre: f.genre, limit: PAGE_SIZE, offset: state.offset })
+      : await api.listData({ ...f, limit: PAGE_SIZE, offset: state.offset });
     state.total = res.total;
     state.items = res.items;
-    tbody.innerHTML = res.items.length ? res.items.map(row).join("")
+    tbody.innerHTML = res.items.length ? res.items.map(isLibrary() ? libraryRow : row).join("")
       : `<tr><td colspan="6" class="empty-note">조건에 맞는 기록이 없어요.</td></tr>`;
-    $("#data-total").textContent = `${fmt(res.total)}건`;
+    $("#data-total").textContent = isLibrary() ? `${fmt(res.total)}편 · 통계 제외` : `${fmt(res.total)}건`;
+    $("#f-order").disabled = isLibrary(); // 서재는 날짜가 없어 지은이·제목 순
     const page = Math.floor(state.offset / PAGE_SIZE) + 1;
     const pages = Math.max(1, Math.ceil(res.total / PAGE_SIZE));
     $("#page-info").textContent = `${page} / ${pages}`;
@@ -110,6 +133,8 @@ function readForm() {
     stage: form.stage.value || null,
     title: form.title.value.trim() || null,
   };
+  const text = $("#count-source").value.trim();
+  if (text) body.excerpt = text; // 붙여넣은 본문을 함께 저장 → AI 가 read_work 로 읽어 퇴고에 활용
   return { errors, body };
 }
 

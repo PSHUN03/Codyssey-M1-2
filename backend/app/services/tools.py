@@ -11,7 +11,7 @@ import re
 from collections import Counter
 
 from ..schemas import GENRES, STAGES
-from . import conversation_service, data_service, summary_service
+from . import conversation_service, data_service, library_service, summary_service
 
 _REASON = {"type": "string", "description": "이 도구를 호출하는 이유를 한 문장으로 (사용자에게 표시됨)"}
 
@@ -57,13 +57,21 @@ TOOLS = [
     _fn(
         "search_works",
         "제목·지은이·메모·본문 발췌에서 키워드로 글을 찾는다. 참고할 만한 작품(예문), 특정 작가의 글, "
-        "사용자가 예전에 쓴 글을 찾을 때 사용한다. 결과에 본문 발췌가 포함된다.",
+        "사용자가 예전에 쓴 글을 찾을 때 사용한다. 시계열 기록과 '참고 작품 서재'(발표 시기 미상 작품)를 함께 "
+        "검색하며, 서재 작품은 date 가 null 이다. 결과에 본문 발췌와 id 가 포함된다.",
         {
             "keyword": {"type": "string", "description": "검색어 (예: 봄, 어머니, 윤동주)"},
             "genre": {"type": "string", "enum": list(GENRES)},
             "mine": {"type": "boolean"},
             "limit": {"type": "integer", "minimum": 1, "maximum": 5},
         },
+    ),
+    _fn(
+        "read_work",
+        "search_works·list_my_records 로 찾은 글의 저장된 본문을 읽는다. 사용자가 저장해 둔 자기 글을 "
+        "퇴고·분석해 달라고 할 때, 또는 참고 작품의 더 긴 본문이 필요할 때 사용한다.",
+        {"id": {"type": "string", "description": "search_works 결과의 id"}},
+        ["id"],
     ),
     _fn(
         "list_my_records",
@@ -124,7 +132,11 @@ def _record_view(r: dict, excerpt: int = 0) -> dict:
     view = {k: r.get(k) for k in ("id", "date", "title", "author", "genre", "value", "stage", "source", "memo")}
     if excerpt and r.get("excerpt"):
         view["excerpt"] = r["excerpt"][:excerpt]
-    return {k: v for k, v in view.items() if v is not None}
+    view = {k: v for k, v in view.items() if v is not None}
+    if r.get("date") is None and r.get("source") == "위키문헌":
+        view["date"] = None  # 참고 작품 서재: 발표 시기 미상
+        view["shelf"] = "참고 작품 서재"
+    return view
 
 
 def _summary_view(s: dict) -> dict:
@@ -156,7 +168,21 @@ def execute(name: str, args: dict) -> dict:
             found = sorted(reversed(found), key=rank)
         else:
             found = list(reversed(found))
+        if not args.get("mine"):  # 참고 작품 서재(발표 시기 미상)도 함께 — 같은 순위면 날짜가 있는 기록 먼저
+            shelf = library_service.filter_works(library_service.all_works(), q=keyword, genre=args.get("genre"))
+            if keyword:
+                found = sorted(found + shelf, key=rank)
+            else:
+                found = found + shelf
         return {"total": len(found), "items": [_record_view(r, excerpt=250) for r in found[:limit]]}
+    if name == "read_work":
+        work = data_service.get_record(args["id"]) or library_service.get_work(args["id"])
+        if not work:
+            return {"error": "해당 id 의 글을 찾을 수 없습니다."}
+        view = _record_view(work)
+        view["text"] = (work.get("excerpt") or "")[:8000]
+        view["text_is_partial"] = work.get("source") == "위키문헌"  # 가져온 작품은 앞부분만 저장
+        return view
     if name == "list_my_records":
         limit = min(int(args.get("limit", 5)), 10)
         _, items = data_service.list_records(mine=True, stage=args.get("stage"), limit=limit)

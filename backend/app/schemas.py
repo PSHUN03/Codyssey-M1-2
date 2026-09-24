@@ -49,7 +49,7 @@ class DataCreate(BaseModel):
     author: Optional[str] = Field(default=None, max_length=50)
     stage: Optional[Stage] = Field(default=None, description="글쓰기 단계")
     source: str = Field(default="직접 작성", max_length=30)
-    excerpt: Optional[str] = Field(default=None, max_length=2000, description="본문 일부(참고용)")
+    excerpt: Optional[str] = Field(default=None, max_length=20000, description="본문 (직접 쓴 글은 전문, 가져온 작품은 앞부분)")
     url: Optional[str] = Field(default=None, max_length=300)
 
     _blank = field_validator("memo", "title", "author", "source")(_not_blank)
@@ -69,7 +69,7 @@ class DataUpdate(BaseModel):
     author: Optional[str] = Field(default=None, max_length=50)
     stage: Optional[Stage] = None
     source: Optional[str] = Field(default=None, max_length=30)
-    excerpt: Optional[str] = Field(default=None, max_length=2000)
+    excerpt: Optional[str] = Field(default=None, max_length=20000)
     url: Optional[str] = Field(default=None, max_length=300)
 
     _blank = field_validator("memo", "title", "author", "source")(_not_blank)
@@ -235,3 +235,31 @@ class ChatResponse(BaseModel):
     summary_used: dict = Field(description="시스템 프롬프트에 주입된 요약(핵심 항목)")
     model: str
     usage: Optional[dict] = None
+
+
+# ------------------------------------------------------------------ library (참고 작품 서재: 발표 시기 미상)
+
+class LibraryWork(BaseModel):
+    """날짜를 확인할 수 없는 실존 작품. 시계열(data)과 달리 date 가 없다."""
+
+    value: int = Field(ge=0, le=2_000_000, description="글자 수(공백 제외)")
+    memo: str = Field(min_length=1, max_length=500)
+    genre: Genre = "기타"
+    title: str = Field(min_length=1, max_length=100)
+    author: Optional[str] = Field(default=None, max_length=50)
+    source: str = Field(default="위키문헌", max_length=30)
+    excerpt: Optional[str] = Field(default=None, max_length=2000)
+    url: Optional[str] = Field(default=None, max_length=300)
+
+
+class LibraryOut(LibraryWork):
+    id: str
+    date: Optional[str] = Field(default=None, description="항상 null (발표 시기 미상)")
+
+
+class LibraryListOut(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    by_genre: list[GroupStat]
+    items: list[LibraryOut]

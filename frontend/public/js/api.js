@@ -55,6 +55,7 @@ export const api = {
   updateData: (id, body) => request(`/api/data/${encodeURIComponent(id)}`, { method: "PUT", body }),
   deleteData: (id) => request(`/api/data/${encodeURIComponent(id)}`, { method: "DELETE" }),
   exportData: (params) => request("/api/data/export", { params, raw: true }),
+  listLibrary: (params) => request("/api/library", { params }),
   listConversations: () => request("/api/conversations"),
   getConversation: (id) => request(`/api/conversations/${encodeURIComponent(id)}`),
   deleteConversation: (id) => request(`/api/conversations/${encodeURIComponent(id)}`, { method: "DELETE" }),

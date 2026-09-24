@@ -50,6 +50,12 @@ def search_works(keyword: str, genre: Optional[str] = None, limit: int = 5) -> d
 
 
 @mcp.tool()
+def read_work(id: str) -> dict:
+    """search_works 로 찾은 글(시계열 기록 또는 참고 작품 서재)의 저장된 본문을 읽는다."""
+    return _call("read_work", id=id)
+
+
+@mcp.tool()
 def list_my_records(limit: int = 10) -> dict:
     """사용자가 직접 기록한 최근 글쓰기 기록(날짜, 글자 수, 단계, 메모)."""
     return _call("list_my_records", limit=limit)

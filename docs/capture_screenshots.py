@@ -4,7 +4,7 @@
     예) python docs/capture_screenshots.py http://localhost:5500 http://localhost:8000
 
 실제 흐름을 그대로 실행한다: AI 질문 → 답변, 기록 추가, 대화 불러오기, 통계, 다크 모드, Swagger.
-(AI 호출 1회, 기록 1건 추가가 실제로 일어난다)
+(AI 호출 1회가 실제로 일어나고, 캡처용 데모 기록 1건은 추가했다가 찍은 뒤 바로 지운다)
 """
 
 import json
@@ -72,6 +72,10 @@ with sync_playwright() as p:
     page.evaluate("window.scrollTo(0, 0)")  # 새로 추가된 첫 행과 토스트가 함께 보이도록
     page.wait_for_timeout(300)
     shot(page, "data")
+    # 캡처용 데모 기록은 찍은 뒤 바로 지운다 (사용자의 '내 기록'에 남지 않도록)
+    demo = json.loads(urllib.request.urlopen(f"{BACK}/api/data?q=%EA%B0%80%EC%9D%84%20%EC%82%B0%EC%B1%85&mine=true").read())
+    for item in demo["items"]:
+        urllib.request.urlopen(urllib.request.Request(f"{BACK}/api/data/{item['id']}", method="DELETE"))
 
     # 3) 대화 기록 화면 → 이전 대화 불러오기 (새로 연 페이지에서)
     page.goto(f"{FRONT}/#/history", wait_until="networkidle")

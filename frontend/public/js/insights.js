@@ -112,6 +112,10 @@ export async function loadInsights() {
     tiles(s, stats);
     renderChart();
     hbars($("#genre-bars"), s.by_genre, "편");
+    api.listLibrary({ limit: 1 }).then((lib) => {
+      const note = $("#library-note");
+      if (note) note.textContent = `※ 발표 시기를 확인할 수 없는 참고 작품 ${fmt(lib.total)}편은 시계열 통계에서 제외하고, AI 작품 검색과 '기록 관리 › 참고 작품 서재'에서만 쓰여요.`;
+    }).catch(() => {});
     hbars($("#author-bars"), stats.top_authors, "편");
   } catch (e) {
     $("#stat-tiles").innerHTML = `<p class="form-error">통계를 불러오지 못했어요: ${esc(e.message)}</p>`;

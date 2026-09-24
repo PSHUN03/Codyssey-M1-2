@@ -23,7 +23,8 @@ def main() -> None:
     args = parser.parse_args()
 
     result = seed(get_store(), reset=args.reset, limit=args.limit)
-    print(f"삭제 {result['removed']}건 / 추가 {result['added']}건 / 기존 {result['skipped']}건")
+    print(f"[data] 삭제 {result['removed']}건 / 추가 {result['added']}건 / 기존 {result['skipped']}건")
+    print(f"[library] 삭제 {result['library_removed']}건 / 추가 {result['library_added']}건 / 기존 {result['library_skipped']}건")
 
 
 if __name__ == "__main__":

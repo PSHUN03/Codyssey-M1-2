@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 DATA_COLLECTION = "data"
 CONVERSATIONS_COLLECTION = "conversations"
+LIBRARY_COLLECTION = "library"  # 발표 시기 미상 참고 작품 (시계열 통계에서 제외)
 
 
 class FirebaseNotConfigured(RuntimeError):

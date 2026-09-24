@@ -44,7 +44,9 @@ def fetch_by_pageids(pageids: list[int]) -> dict[int, dict]:
 
 def main() -> None:
     data = json.loads(OUT_PATH.read_text(encoding="utf-8"))
-    records = data["records"]
+    dated = data["records"]
+    shelf = data.get("library", [])
+    records = dated + shelf  # 시계열 + 참고 작품 서재(발표 시기 미상) 모두 검증
     live = fetch_by_pageids([r["pageid"] for r in records])
 
     exists = title_ok = pd = 0
@@ -65,7 +67,8 @@ def main() -> None:
 
     by_basis = Counter(r.get("basis") or r["memo"].split("— ")[-1].split(" 기준")[0] for r in records)
     random.seed(2026)
-    sample = random.sample(records, min(20, len(records)))
+    sample = random.sample(dated, min(20, len(dated)))
+    shelf_sample = random.sample(shelf, min(10, len(shelf)))
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     lines = [
         "# 작품 데이터 실존 검증",
@@ -76,7 +79,7 @@ def main() -> None:
         "",
         "| 항목 | 결과 |",
         "|---|---|",
-        f"| 전체 레코드 | {len(records):,}편 |",
+        f"| 전체 | {len(records):,}편 (시계열 {len(dated):,} + 참고 작품 서재 {len(shelf):,}) |",
         f"| 위키문헌에 문서가 존재 | {exists:,}편 ({exists / len(records):.1%}) |",
         f"| 문서 제목이 레코드 URL과 일치 | {title_ok:,}편 |",
         f"| 퍼블릭 도메인 라이선스 확인(본문 또는 목차 문서) | {pd:,}편 |",
@@ -87,13 +90,23 @@ def main() -> None:
         "|---|---|",
         *[f"| {k} | {v:,} |" for k, v in by_basis.most_common()],
         "",
-        "## 무작위 표본 20편 (링크를 눌러 원문 확인 가능)",
+        "## 시계열 무작위 표본 20편 (링크를 눌러 원문 확인 가능)",
         "",
         "| 날짜 | 작품 | 지은이 | 장르 | 글자 수 | 날짜 근거 |",
         "|---|---|---|---|---|---|",
         *[f"| {r['date']} | [{r['title']}]({r['url']}) | {r['author'] or '작자 미상'} | {r['genre']} | "
           f"{r['value']:,} | {r.get('basis', '')} |" for r in sorted(sample, key=lambda x: x["date"])],
     ]
+    if shelf_sample:
+        lines += [
+            "",
+            "## 참고 작품 서재 무작위 표본 10편 (발표 시기 미상 — 시계열 통계 제외)",
+            "",
+            "| 작품 | 지은이 | 장르 | 글자 수 | 메모 |",
+            "|---|---|---|---|---|",
+            *[f"| [{r['title']}]({r['url']}) | {r['author'] or '작자 미상'} | {r['genre']} | {r['value']:,} | "
+              f"{r['memo'][:60]} |" for r in sorted(shelf_sample, key=lambda x: (x['author'], x['title']))],
+        ]
     if problems:
         lines += ["", "## 확인이 필요한 레코드", "", *[f"- {p}" for p in problems[:50]]]
     REPORT.write_text("\n".join(lines) + "\n", encoding="utf-8")

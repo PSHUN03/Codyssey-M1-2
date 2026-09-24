@@ -54,7 +54,7 @@
         <div class="hero-copy">
           <span class="badge-positive">글쓰기 전용 AI 코치</span>
           <h1 class="display">주제부터<br />퇴고까지<br />같이 씁니다.</h1>
-          <p class="lead">시·수필·소설·동화·희곡, 장르는 상관없어요. 글벗은 당신의 글쓰기 기록과 한국 문학 작품 1,500여 편을 읽고, 지금 쓰는 단계에 맞는 질문과 피드백을 건넵니다.</p>
+          <p class="lead">시·수필·소설·동화·희곡, 장르는 상관없어요. 글벗은 당신의 글쓰기 기록과 한국 문학 작품 2,600여 편을 읽고, 지금 쓰는 단계에 맞는 질문과 피드백을 건넵니다.</p>
           <ol class="steps" aria-label="글쓰기 단계">
             <li><b>01</b>주제 선정</li>
             <li><b>02</b>구상·개요</li>
@@ -145,8 +145,8 @@
               </div>
               <label class="field"><span>메모 *</span><textarea name="memo" rows="3" maxlength="500" required placeholder="오늘 작업한 내용, 막힌 점, 다음에 할 일"></textarea></label>
               <details class="counter">
-                <summary>본문을 붙여넣어 글자 수 자동 계산</summary>
-                <textarea id="count-source" rows="5" placeholder="쓴 글을 붙여넣으면 공백 제외 글자 수가 위 칸에 들어가요."></textarea>
+                <summary>본문 붙여넣기 (글자 수 자동 계산 + 본문 저장)</summary>
+                <textarea id="count-source" rows="5" maxlength="20000" placeholder="쓴 글을 붙여넣으면 공백 제외 글자 수가 위 칸에 들어가고, 본문도 함께 저장돼서 AI가 퇴고할 때 읽을 수 있어요."></textarea>
                 <p id="count-result" class="caption">0자 (공백 포함 0자)</p>
               </details>
               <p id="form-error" class="form-error" role="alert" hidden></p>
@@ -163,6 +163,7 @@
                 <option value="">전체 출처</option>
                 <option value="true">내가 쓴 기록</option>
                 <option value="false">위키문헌 작품</option>
+                <option value="library">참고 작품 서재 (발표 시기 미상)</option>
               </select>
               <select id="f-genre" class="genre-select" data-empty="전체 장르" aria-label="장르"></select>
               <input id="f-q" type="search" maxlength="50" placeholder="제목 · 지은이 · 메모 검색" aria-label="검색" />
@@ -212,6 +213,7 @@
           </div>
         </div>
         <div id="stat-tiles" class="stat-tiles"></div>
+        <p id="library-note" class="caption library-note"></p>
         <section class="card chart-card">
           <div class="card-head">
             <h2 id="chart-title" class="display-xs">연대별 작품 수</h2>

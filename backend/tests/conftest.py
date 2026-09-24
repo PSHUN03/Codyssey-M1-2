@@ -11,13 +11,14 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 import main  # noqa: E402
 from app import rate_limit, storage  # noqa: E402
-from app.services import data_service  # noqa: E402
+from app.services import data_service, library_service  # noqa: E402
 
 
 @pytest.fixture
 def client():
     storage.get_store.cache_clear()
     data_service.invalidate()
+    library_service.invalidate()
     rate_limit.reset()
     # with 문 없이 만들면 lifespan(1,500여 편 시드)이 돌지 않아 빈 저장소에서 시작한다.
     return TestClient(main.app)

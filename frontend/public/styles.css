@@ -356,6 +356,7 @@ main { flex: 1; }
 .trend-down { color: var(--negative); }
 .trend-up { color: var(--positive); }
 .chart-card { margin-bottom: var(--s-lg); }
+.library-note { margin: calc(-1 * var(--s-sm)) 0 var(--s-lg); font-size: 13px; line-height: 20px; }
 .seg { display: inline-flex; background: var(--canvas-soft); padding: 4px; border-radius: var(--r-pill); gap: 2px; }
 .seg button { border: 0; background: transparent; padding: 6px 14px; border-radius: var(--r-pill); cursor: pointer; font-size: 14px; font-weight: 600; color: var(--body); }
 .seg button[aria-checked="true"] { background: var(--ink); color: var(--canvas); }

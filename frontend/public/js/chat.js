@@ -84,6 +84,7 @@ function resetMessages() {
 // 대화는 /api/chat 이 conversations 에 자동 저장한다 → 저장 결과를 채팅 카드에 표시
 function setSaveState(conv) {
   const el = $("#save-state");
+  if (!el) return; // 선택적 표시 요소 — 없으면(예: 옛 HTML 캐시) 조용히 건너뛴다
   if (!conv) { el.hidden = true; return; }
   el.textContent = `✓ 대화 기록에 저장됨 · 메시지 ${conv.message_count}개`;
   el.title = `conversations/${conv.id} — 눌러서 대화 기록 보기`;
@@ -181,25 +182,38 @@ async function send(text) {
 
   addMessage({ role: "user", content: text, stage: state.stage });
   const stopLoading = showLoading();
+  let res;
   try {
-    const res = await api.chat({
-      message: text,
-      conversation_id: state.convId,
-      stage: state.stage,
-      genre: $("#chat-genre").value || null,
-    });
+    // 1) 서버 요청: 여기서 난 오류만 '전송 실패'로 보고 입력을 되돌린다
+    try {
+      res = await api.chat({
+        message: text,
+        conversation_id: state.convId,
+        stage: state.stage,
+        genre: $("#chat-genre").value || null,
+      });
+    } catch (e) {
+      stopLoading();
+      addMessage({ role: "assistant", content: `⚠ ${e.message}` }, { error: true });
+      if (!input.value) input.value = text; // 다시 보낼 수 있게 복원
+      autosize();
+      return;
+    }
+    // 2) 응답 표시: 서버는 이미 답변을 만들고 대화를 저장했다. 여기서 화면 오류가 나도
+    //    전송 실패로 알리거나 입력을 되돌리지 않는다 (같은 질문을 두 번 보내 중복 저장되는 것 방지)
     stopLoading();
     const isNew = !state.convId;
     state.convId = res.conversation_id;
-    addMessage({ role: "assistant", content: res.reply, stage: state.stage, tool_calls: res.tool_calls });
-    if (isNew) $("#chat-title").textContent = text.length > 30 ? `${text.slice(0, 30)}…` : text;
-    await loadConversations();
-    setSaveState(state.conversations.find((c) => c.id === res.conversation_id) || { id: res.conversation_id, message_count: "" });
-  } catch (e) {
-    stopLoading();
-    addMessage({ role: "assistant", content: `⚠ ${e.message}` }, { error: true });
-    if (!input.value) input.value = text; // 다시 보낼 수 있게 복원
-    autosize();
+    try {
+      addMessage({ role: "assistant", content: res.reply, stage: state.stage, tool_calls: res.tool_calls });
+      const title = $("#chat-title");
+      if (isNew && title) title.textContent = text.length > 30 ? `${text.slice(0, 30)}…` : text;
+      await loadConversations();
+      setSaveState(state.conversations.find((c) => c.id === res.conversation_id) || { id: res.conversation_id, message_count: "" });
+    } catch (e) {
+      console.error("응답 표시 중 오류 (대화는 저장됨):", e);
+      toast("답변은 저장됐지만 화면을 갱신하지 못했어요. 새로고침하면 대화 기록에서 볼 수 있어요.", { error: true });
+    }
   } finally {
     state.sending = false;
     $("#send-btn").disabled = false;
