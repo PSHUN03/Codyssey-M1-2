@@ -31,7 +31,7 @@ class ChatError(Exception):
 
 @lru_cache
 def _client() -> OpenAI:
-    return OpenAI(api_key=settings.openai_api_key, timeout=60, max_retries=1)
+    return OpenAI(api_key=settings.openai_api_key, base_url=settings.openai_base_url or None, timeout=60, max_retries=1)
 
 
 def _complete(messages: list[dict], use_tools: bool):

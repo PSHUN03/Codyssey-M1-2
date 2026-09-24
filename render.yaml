@@ -12,9 +12,11 @@ services:
       - key: PYTHON_VERSION
         value: 3.12.8
       - key: OPENAI_MODEL
-        value: gpt-4.1-mini
+        value: gpt-5.4-mini
+      - key: OPENAI_BASE_URL
+        value: https://copa.codyssey.kr/v1
       - key: OPENAI_MAX_TOKENS
-        value: "900"
+        value: "1200"
       - key: OPENAI_API_KEY
         sync: false
       - key: FIREBASE_SERVICE_ACCOUNT_JSON

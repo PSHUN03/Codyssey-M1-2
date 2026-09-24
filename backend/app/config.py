@@ -15,11 +15,16 @@ def _split(value: str) -> list[str]:
 @dataclass(frozen=True)
 class Settings:
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
-    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+    # 교육용 게이트웨이 등 OpenAI 호환 서버를 쓸 때만 지정 (비우면 OpenAI 공식 API)
+    openai_base_url: str = os.getenv("OPENAI_BASE_URL", "").strip()
+    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-5.4-mini")
     # 과금 방지: 답변 1회 최대 토큰, 도구 호출 반복 횟수, 대화 히스토리 길이 제한
-    openai_max_tokens: int = int(os.getenv("OPENAI_MAX_TOKENS", "900"))
+    openai_max_tokens: int = int(os.getenv("OPENAI_MAX_TOKENS", "1200"))
     max_tool_rounds: int = int(os.getenv("MAX_TOOL_ROUNDS", "3"))
     history_limit: int = int(os.getenv("CHAT_HISTORY_LIMIT", "10"))
+    # 과금 방지: 요청 횟수 제한 (IP별 분당 / 서버 전체 하루)
+    chat_rate_per_minute: int = int(os.getenv("CHAT_RATE_PER_MINUTE", "6"))
+    chat_daily_limit: int = int(os.getenv("CHAT_DAILY_LIMIT", "300"))
 
     # firestore(기본) | memory(Firebase 키 없이 로컬에서 기능만 확인할 때, 재시작하면 사라짐)
     storage_backend: str = os.getenv("STORAGE_BACKEND", "firestore").lower()
