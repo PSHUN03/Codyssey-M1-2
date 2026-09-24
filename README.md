@@ -303,18 +303,18 @@ python -m scripts.mcp_smoke_test https://geulbeot-api.onrender.com       # 로�
 
 ```text
 연결: 원격 Streamable HTTP · https://geulbeot-api.onrender.com/mcp · 서버 이름: geulbeot
-도구: get_data_summary, get_statistics, search_works, read_work, list_my_records, list_conversations, get_conversation, analyze_text, add_writing_record
-- get_data_summary({}) → 성공: { "period": "1447-01-01 ~ 2026-09-24", "count": 2050, "metrics": { "total": 7089824, "average": 3458.5, "median": 237.0, "max": 333364, "min": 23, "std": 16589.5 }, "trend": "하락 (최근 30건 평균 5,293자, 직전 
-- get_statistics({"group": "decade", "genre": "시"}) → 성공: { "group": "decade", "filters": { "genre": "시" }, "series": [ { "period": "1840년대", "count": 1, "total": 723, "average": 723.0 }, { "period": "1890년대", "count": 1, "total": …
-- search_works({"keyword": "고향", "genre": "시", "limit": 2}) → 성공: { "total": 60, "items": [ { "id": "pV7NvoAWvWzz9I3NUD6a", "date": "1931-11-01", "title": "고향", "author": "박용철", "genre": "시", "value": 207, "source": "위키문헌", "memo" …
-- list_conversations({"limit": 3}) → 성공: { "items": [ { "id": "qFE3zyQxbVrorKpXIVti", "title": "내가 저장해 둔 '우산 아래 서되, 우산이 접힐 때를 …", "preview": "분석해 보니 이 글은 **10.4매, 5문단, 30문장, 평균 문장 길이 68.5자**로, 정보 밀도가 높고 논지 전개가 빠릅니다. 퇴고는 **", "upda …
+도구: get_data_summary, get_statistics, search_works, search_books, read_work, list_my_records, list_conversations, get_conversation, analyze_text, add_writing_record
+- get_data_summary({}) → 성공: { "period": "1447-01-01 ~ 2026-09-24", "count": 2614, "metrics": { "total": 18518113, "average": 7084.2, "median": 316.0, "max": 633491, "min": 23, "std": 30867.0 }, "trend": "하락 (최근 30건 평균 7,220자, 직전
+- get_statistics({"group": "decade", "genre": "시"}) → 성공: { "group": "decade", "filters": { "genre": "시" }, "series": [ { "period": "1480년대", "count": 3, "total": 534, "average": 178.0 }, { "period": "1890년대", "count": 1, "total": 165, "average": 165.0 }, { 
+- search_works({"keyword": "고향", "genre": "시", "limit": 2}) → 성공: { "total": 61, "items": [ { "id": "thVSDAONzlgsKMxqajXV", "date": "1931-11-01", "title": "고향", "author": "박용철", "genre": "시", "value": 207, "source": "위키문헌", "memo": "《고향》 박용철 — 발표 월 기준 · 《박용철 …
+- list_conversations({"limit": 3}) → 성공: { "items": [ { "id": "KSfXsBBwpH4mQ1FTf7m7", "title": "내 데이터 요약을 보고 어떤 장르가 많고 추세가 어떤지…", "preview": "좋아요. 먼저 데이터부터 보면, **가장 많은 장르는 시 1423건(평균 329자)**입니다. 그다음은 **수필 298건(평균 3,748자)**", "updated_at": "2
 
 연결: 로컬 stdio · mcp_server.py → https://geulbeot-api.onrender.com · 서버 이름: geulbeot
 도구: get_data_summary, get_statistics, search_works, list_my_records, list_conversations, get_conversation, add_writing_record
-- get_data_summary({}) → 성공: { "period": "1447-01-01 ~ 2026-09-24", "period_start": "1447-01-01", "period_end": "2026-09-24", "count": 2050, "metrics": { "total": 7089824, "average": 3458.5, "median": 237.0, "max": 333364, "min":
-- get_statistics({"group": "decade", "genre": "시"}) → 성공: { "group": "decade", "filters": { "genre": "시" }, "series": [ { "period": "1840년대", "count": 1, "total": 723, "average": 723.0 }, { "period": "1890년대", "count": 1, "total": …
-- search_works({"keyword": "고향", "genre": "시", "limit": 2}) → 성공: { "date": "1960-11-01", "title": "무제 3", "author": "이상", "genre": "시", "value": 223, "memo": "《무제 3》 이상 — 발표 월 기준 · 〈현대문학〉, 1960.11.", "excerpt": "손가락 같은 여인이 입술로 지문 …
-- list_conversations({"limit": 3}) → 성공: { "id": "qFE3zyQxbVrorKpXIVti", "title": "내가 저장해 둔 '우산 아래 서되, 우산이 접힐 때를 …", "message_count": 2, "preview": "분석해 보니 이 글은 **10.4매, 5문단, 30문장, 평균 문장 길이 68.5자**로, 정보 밀도가 높고 논지 전개가 빠릅니다. 퇴고는 **" …
+- get_data_summary({}) → 성공: { "period": "1447-01-01 ~ 2026-09-24", "period_start": "1447-01-01", "period_end": "2026-09-24", "count": 2614, "metrics": { "total": 18518113, "average": 7084.2, "median": 316.0, "max": 633491, "min"
+- get_statistics({"group": "decade", "genre": "시"}) → 성공: { "group": "decade", "filters": { "genre": "시" }, "series": [ { "period": "1480년대", "count": 3, "total": 534, "average": 178.0 }, { "period": "1890년대", "count": 1, "total": 165, "average": 165.0 }, { 
+- search_works({"keyword": "고향", "genre": "시", "limit": 2}) → 성공: { "date": "1960-11-01", "title": "무제 3", "author": "이상", "genre": "시", "value": 223, "memo": "《무제 3》 이상 — 발표 월 기준 · 〈현대문학〉, 1960.11.", "excerpt": "손가락 같은 여인이 입술로 지문을 찍으며 간다. 불상한 수인은 영원의 낙인을 받고 …
+- list_conversations({"limit": 3}) → 성공: { "id": "KSfXsBBwpH4mQ1FTf7m7", "title": "내 데이터 요약을 보고 어떤 장르가 많고 추세가 어떤지…", "message_count": 2, "preview": "좋아요. 먼저 데이터부터 보면, **가장 많은 장르는 시 1423건(평균 329자)**입니다. 그다음은 **수필 298건(평균 3,748자)**", "created_
 ```
 
 → 웹 채팅(Function Calling), 원격 MCP, 로컬 MCP 세 채널이 **같은 Firestore 데이터**를 보는 것을 확인했습니다. 원격 `/mcp`는 `tests/test_mcp_remote.py`에서 JSON-RPC 메시지(initialize → tools/list → tools/call)와 허용되지 않은 Host 거부까지 자동 테스트합니다.
