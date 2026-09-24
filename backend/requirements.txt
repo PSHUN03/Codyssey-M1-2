@@ -1,0 +1,8 @@
+fastapi==0.141.1
+uvicorn[standard]==0.53.0
+firebase-admin==7.7.0
+openai==3.19.2
+python-dotenv==1.2.3
+# 보너스: MCP 서버 (mcp_server.py)
+mcp==2.2.0
+httpx==0.28.1

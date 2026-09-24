@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>글벗 — AI 글쓰기 코치</title>
+  <meta name="description" content="주제 선정부터 퇴고까지, 내 글쓰기 기록을 아는 AI 코치" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23256abf'/%3E%3Cpath d='M9 22l3-9 11-4-4 11-9 3z' fill='%23fff'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet" />
+  <script>
+    // 첫 페인트 전에 테마 적용 (깜빡임 방지)
+    try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="config.js"></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="28" height="28"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M9 22l3-9 11-4-4 11-9 3z" fill="var(--surface-1)"/></svg>
+      </span>
+      <div>
+        <strong class="brand-name">글벗</strong>
+        <span class="brand-sub">주제부터 퇴고까지, 내 기록을 아는 글쓰기 코치</span>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="화면 전환">
+      <button role="tab" class="tab" data-view="chat" aria-selected="true">채팅</button>
+      <button role="tab" class="tab" data-view="data" aria-selected="false">기록 관리</button>
+      <button role="tab" class="tab" data-view="insights" aria-selected="false">통계</button>
+    </nav>
+    <div class="topbar-actions">
+      <span id="server-status" class="status-pill" data-state="pending" title="백엔드 연결 상태">
+        <span class="dot" aria-hidden="true"></span><span class="label">연결 중</span>
+      </span>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="다크 모드 전환" title="다크 모드 전환">
+        <svg class="i-moon" viewBox="0 0 24 24" width="20" height="20"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="wake-banner" class="banner" hidden>
+    <strong>서버를 깨우는 중이에요.</strong>
+    무료 서버(Render)는 한동안 쓰지 않으면 잠들어서, 첫 연결에 최대 1분 정도 걸릴 수 있어요. 잠시만 기다려 주세요.
+  </div>
+
+  <main>
+    <!-- ============================ 채팅 ============================ -->
+    <section id="view-chat" class="view chat-layout" data-active="true" aria-label="채팅">
+      <aside class="panel conv-panel" aria-label="대화 기록">
+        <div class="panel-head">
+          <h2>대화 기록</h2>
+          <button id="new-chat" class="btn btn-primary btn-sm" type="button">+ 새 대화</button>
+        </div>
+        <ul id="conv-list" class="conv-list" aria-live="polite"></ul>
+      </aside>
+
+      <section class="panel chat-panel" aria-label="대화">
+        <div class="chat-controls">
+          <div class="stage-chips" role="radiogroup" aria-label="글쓰기 단계">
+            <button class="chip" role="radio" data-stage="자유" aria-checked="true">자유</button>
+            <button class="chip" role="radio" data-stage="주제 선정" aria-checked="false"><b>1</b> 주제 선정</button>
+            <button class="chip" role="radio" data-stage="구상·개요" aria-checked="false"><b>2</b> 구상·개요</button>
+            <button class="chip" role="radio" data-stage="초고" aria-checked="false"><b>3</b> 초고</button>
+            <button class="chip" role="radio" data-stage="퇴고" aria-checked="false"><b>4</b> 퇴고</button>
+          </div>
+          <label class="inline-field">
+            <span>장르</span>
+            <select id="chat-genre" class="genre-select" data-empty="장르 무관"></select>
+          </label>
+        </div>
+
+        <div id="chat-title" class="chat-title">새 대화</div>
+        <div id="messages" class="messages" aria-live="polite">
+          <div id="chat-empty" class="chat-empty">
+            <h3>무엇을 써볼까요?</h3>
+            <p>단계를 고르고 편하게 말을 걸어 보세요. 글벗은 오른쪽의 <b>데이터 요약</b>을 알고 대답해요.</p>
+            <div id="suggestions" class="suggestions"></div>
+          </div>
+        </div>
+
+        <form id="composer" class="composer" autocomplete="off">
+          <textarea id="chat-input" rows="1" maxlength="8000" placeholder="메시지를 입력하세요 (Enter 전송, Shift+Enter 줄바꿈)" aria-label="메시지"></textarea>
+          <button id="send-btn" class="btn btn-primary" type="submit">보내기</button>
+        </form>
+      </section>
+
+      <aside class="panel summary-panel" aria-label="데이터 요약">
+        <div class="panel-head">
+          <h2>데이터 요약</h2>
+          <button id="refresh-summary" class="icon-btn icon-btn-sm" type="button" aria-label="요약 새로고침" title="새로고침">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <p class="hint">채팅할 때마다 이 요약이 AI의 시스템 프롬프트에 주입돼요.</p>
+        <div id="summary-box" class="summary-box"><div class="skeleton"></div></div>
+      </aside>
+    </section>
+
+    <!-- ============================ 기록 관리 ============================ -->
+    <section id="view-data" class="view data-layout" data-active="false" aria-label="기록 관리">
+      <section class="panel form-panel">
+        <div class="panel-head">
+          <h2 id="form-title">새 기록 추가</h2>
+          <button id="cancel-edit" class="btn btn-ghost btn-sm" type="button" hidden>수정 취소</button>
+        </div>
+        <form id="data-form" class="data-form" novalidate>
+          <div class="field-row">
+            <label class="field"><span>날짜 *</span><input type="date" name="date" required /></label>
+            <label class="field"><span>글자 수 *</span><input type="number" name="value" min="0" max="2000000" step="1" required inputmode="numeric" /></label>
+          </div>
+          <label class="field"><span>제목</span><input type="text" name="title" maxlength="100" placeholder="예: 가을 산책" /></label>
+          <div class="field-row">
+            <label class="field"><span>장르</span><select name="genre" class="genre-select"></select></label>
+            <label class="field"><span>단계</span><select name="stage" id="stage-select"></select></label>
+          </div>
+          <label class="field"><span>메모 *</span><textarea name="memo" rows="3" maxlength="500" required placeholder="오늘 작업한 내용, 막힌 점, 다음에 할 일"></textarea></label>
+          <details class="counter">
+            <summary>본문을 붙여넣어 글자 수 자동 계산</summary>
+            <textarea id="count-source" rows="5" placeholder="여기에 쓴 글을 붙여넣으면 공백 제외 글자 수가 위 칸에 들어가요."></textarea>
+            <p id="count-result" class="hint">0자 (공백 포함 0자)</p>
+          </details>
+          <p id="form-error" class="form-error" role="alert" hidden></p>
+          <button id="form-submit" class="btn btn-primary btn-block" type="submit">저장</button>
+        </form>
+      </section>
+
+      <section class="panel list-panel">
+        <div class="panel-head">
+          <h2>기록 목록 <span id="data-total" class="count-badge"></span></h2>
+          <div class="export">
+            <button class="btn btn-ghost btn-sm" data-export="csv" type="button">CSV 내보내기</button>
+            <button class="btn btn-ghost btn-sm" data-export="json" type="button">JSON 내보내기</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select id="f-mine" aria-label="출처">
+            <option value="">전체 출처</option>
+            <option value="true">내가 쓴 기록</option>
+            <option value="false">위키문헌 작품</option>
+          </select>
+          <select id="f-genre" class="genre-select" data-empty="전체 장르" aria-label="장르"></select>
+          <input id="f-q" type="search" maxlength="50" placeholder="제목·지은이·메모 검색" aria-label="검색" />
+          <select id="f-order" aria-label="정렬">
+            <option value="desc">최신순</option>
+            <option value="asc">오래된순</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>날짜</th><th>제목 · 메모</th><th>장르</th><th>단계</th><th class="num">글자 수</th><th class="actions-col"><span class="sr-only">작업</span></th></tr>
+            </thead>
+            <tbody id="data-rows"></tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <button id="prev-page" class="btn btn-ghost btn-sm" type="button">이전</button>
+          <span id="page-info"></span>
+          <button id="next-page" class="btn btn-ghost btn-sm" type="button">다음</button>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============================ 통계 ============================ -->
+    <section id="view-insights" class="view insights-layout" data-active="false" aria-label="통계">
+      <div class="filters insights-filters">
+        <select id="i-mine" aria-label="범위">
+          <option value="">전체 데이터</option>
+          <option value="true">내가 쓴 기록</option>
+          <option value="false">위키문헌 작품</option>
+        </select>
+        <select id="i-genre" class="genre-select" data-empty="전체 장르" aria-label="장르"></select>
+        <select id="i-group" aria-label="묶음 단위">
+          <option value="decade">연대별</option>
+          <option value="year" selected>연도별</option>
+          <option value="month">월별</option>
+        </select>
+      </div>
+      <div id="stat-tiles" class="stat-tiles"></div>
+      <section class="panel chart-panel">
+        <div class="panel-head">
+          <h2 id="chart-title">연도별 작품 수</h2>
+          <div class="seg" role="radiogroup" aria-label="지표">
+            <button role="radio" data-metric="count" aria-checked="true">작품 수</button>
+            <button role="radio" data-metric="average" aria-checked="false">평균 글자 수</button>
+            <button role="radio" data-metric="total" aria-checked="false">총 글자 수</button>
+          </div>
+        </div>
+        <div id="chart" class="chart" role="img"></div>
+        <details class="table-view">
+          <summary>표로 보기</summary>
+          <div id="chart-table" class="table-wrap"></div>
+        </details>
+      </section>
+      <div class="two-col">
+        <section class="panel">
+          <div class="panel-head"><h2>장르별 분포</h2></div>
+          <div id="genre-bars" class="hbars"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h2>많이 쓴 작가</h2></div>
+          <div id="author-bars" class="hbars"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <div id="tooltip" class="tooltip" hidden></div>
+</body>
+</html>
