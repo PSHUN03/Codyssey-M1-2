@@ -7,6 +7,7 @@ const TOOL_LABELS = {
   get_statistics: "기간별 통계 조회",
   search_works: "작품 검색",
   read_work: "본문 읽기",
+  search_books: "참고 도서 검색",
   list_my_records: "내 기록 조회",
   list_conversations: "이전 대화 목록",
   get_conversation: "이전 대화 불러오기",

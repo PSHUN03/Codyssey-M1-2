@@ -11,7 +11,7 @@ import re
 from collections import Counter
 
 from ..schemas import GENRES, STAGES
-from . import conversation_service, data_service, library_service, summary_service
+from . import books_service, conversation_service, data_service, library_service, summary_service
 
 _REASON = {"type": "string", "description": "이 도구를 호출하는 이유를 한 문장으로 (사용자에게 표시됨)"}
 
@@ -65,6 +65,17 @@ TOOLS = [
             "mine": {"type": "boolean"},
             "limit": {"type": "integer", "minimum": 1, "maximum": 5},
         },
+    ),
+    _fn(
+        "search_books",
+        "참고 도서 목록(한국문화정보원 기관별 도서정보 중 문학 자료: 시집·소설집·수필집·희곡 대본·문학 연구서 등)을 "
+        "제목·저자·발행처로 찾는다. 본문은 없고 서지 정보만 있다. 사용자에게 더 읽어 볼 책을 추천할 때 사용한다.",
+        {
+            "keyword": {"type": "string", "description": "검색어 (예: 시집, 윤동주, 희곡)"},
+            "genre": {"type": "string", "enum": list(GENRES)},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 8},
+        },
+        ["keyword"],
     ),
     _fn(
         "read_work",
@@ -176,6 +187,12 @@ def execute(name: str, args: dict) -> dict:
             else:
                 found = found + shelf
         return {"total": len(found), "items": [_record_view(r, excerpt=250) for r in found[:limit]]}
+    if name == "search_books":
+        res = books_service.list_books(q=args.get("keyword"), genre=args.get("genre"),
+                                       limit=min(int(args.get("limit", 5)), 8))
+        keep = ("title", "author", "publisher", "genre", "institution", "url", "wikisource_url")
+        return {"total": res["total"], "note": "서지 정보만 있음 (본문·원작 발표일 없음)",
+                "items": [{k: b.get(k) for k in keep if b.get(k)} for b in res["items"]]}
     if name == "read_work":
         work = data_service.get_record(args["id"]) or library_service.get_work(args["id"])
         if not work:

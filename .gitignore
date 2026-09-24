@@ -18,3 +18,4 @@ Thumbs.db
 .claude/
 backend/data/.wikisource_cache.json
 backend/data/.wikisource_pages.json
+backend/data/.kcisa_raw/

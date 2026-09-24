@@ -14,6 +14,7 @@ SYSTEM_TEMPLATE = """당신은 '글벗'이라는 글쓰기 코치 AI입니다.
 - 장르 분포: {by_genre}
 - 출처 분포: {by_source}
 - 참고 작품 서재: 발표 시기를 확인할 수 없는 실존 작품 {library_count}편 (위 통계에는 포함되지 않음, search_works 로 검색 가능)
+- 참고 도서 목록: 한국문화정보원 기관별 도서정보 중 문학 자료 {books_count}권 (서지 정보만, search_books 로 검색해 읽을거리 추천에 사용)
 
 [사용자가 직접 쓴 기록]
 - 기간: {mine_period} / {mine_count}건 / 평균 {mine_average}자
@@ -76,7 +77,8 @@ def _fmt_brief(b: dict | None) -> str:
     return f"{b['date']} {title}{author} [{b['genre']}{stage}] {b['value']:,}자"
 
 
-def build_system_prompt(summary: dict, mine: dict, stage: str, genre: str | None, library_count: int = 0) -> str:
+def build_system_prompt(summary: dict, mine: dict, stage: str, genre: str | None, library_count: int = 0,
+                        books_count: int = 0) -> str:
     m = summary.get("metrics") or {}
     mm = mine.get("metrics") or {}
     return SYSTEM_TEMPLATE.format(
@@ -92,6 +94,7 @@ def build_system_prompt(summary: dict, mine: dict, stage: str, genre: str | None
         by_genre=_fmt_groups(summary["by_genre"]),
         by_source=_fmt_groups(summary["by_source"]),
         library_count=f"{library_count:,}",
+        books_count=f"{books_count:,}",
         mine_period=mine["period"],
         mine_count=mine["count"],
         mine_average=f"{mm.get('average', 0):,.0f}",

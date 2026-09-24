@@ -55,20 +55,44 @@ function libraryRow(w) {
 }
 
 const isLibrary = () => $("#f-mine").value === "library";
+const isBooks = () => $("#f-mine").value === "books";
+const isReadOnly = () => isLibrary() || isBooks();
+
+function bookRow(b) {
+  const who = [b.author, b.publisher].filter(Boolean).map(esc).join(" · ");
+  const link = b.url ? `<a class="tag src" href="${esc(b.url)}" target="_blank" rel="noopener">${esc(b.institution || "KCISA")}</a>`
+    : `<span class="tag src">${esc(b.institution || "KCISA")}</span>`;
+  return `
+    <tr data-id="${esc(b.id)}">
+      <td class="cell-date">서지 정보</td>
+      <td class="cell-title">
+        <span class="t">${esc(b.title)}</span>${who ? `<span class="a">${who}</span>` : ""} ${link}
+        ${b.wikisource_url ? `<a class="tag src" href="${esc(b.wikisource_url)}" target="_blank" rel="noopener">위키문헌 원문</a>` : ""}
+        <span class="m">${esc(b.collection || "")}${b.copies > 1 ? ` · 소장본 ${b.copies}권` : ""}</span>
+      </td>
+      <td><span class="tag">${esc(b.genre)}</span></td>
+      <td></td>
+      <td class="num">–</td>
+      <td><span class="caption">읽기 전용</span></td>
+    </tr>`;
+}
 
 export async function loadList() {
   const tbody = $("#data-rows");
   try {
     const f = filters();
-    const res = isLibrary()
-      ? await api.listLibrary({ q: f.q, genre: f.genre, limit: PAGE_SIZE, offset: state.offset })
-      : await api.listData({ ...f, limit: PAGE_SIZE, offset: state.offset });
+    const res = isBooks()
+      ? await api.listBooks({ q: f.q, genre: f.genre, limit: PAGE_SIZE, offset: state.offset })
+      : isLibrary()
+        ? await api.listLibrary({ q: f.q, genre: f.genre, limit: PAGE_SIZE, offset: state.offset })
+        : await api.listData({ ...f, limit: PAGE_SIZE, offset: state.offset });
     state.total = res.total;
     state.items = res.items;
-    tbody.innerHTML = res.items.length ? res.items.map(isLibrary() ? libraryRow : row).join("")
+    tbody.innerHTML = res.items.length ? res.items.map(isBooks() ? bookRow : isLibrary() ? libraryRow : row).join("")
       : `<tr><td colspan="6" class="empty-note">조건에 맞는 기록이 없어요.</td></tr>`;
-    $("#data-total").textContent = isLibrary() ? `${fmt(res.total)}편 · 통계 제외` : `${fmt(res.total)}건`;
-    $("#f-order").disabled = isLibrary(); // 서재는 날짜가 없어 지은이·제목 순
+    $("#data-total").textContent = isBooks() ? `${fmt(res.total)}권 · 서지 정보`
+      : isLibrary() ? `${fmt(res.total)}편 · 통계 제외` : `${fmt(res.total)}건`;
+    $("#f-order").disabled = isReadOnly(); // 서재·도서 목록은 날짜순 정렬이 없다
     const page = Math.floor(state.offset / PAGE_SIZE) + 1;
     const pages = Math.max(1, Math.ceil(res.total / PAGE_SIZE));
     $("#page-info").textContent = `${page} / ${pages}`;

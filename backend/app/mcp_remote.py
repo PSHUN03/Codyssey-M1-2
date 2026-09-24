@@ -50,6 +50,12 @@ def search_works(keyword: str, genre: Optional[str] = None, limit: int = 5) -> d
 
 
 @mcp.tool()
+def search_books(keyword: str, genre: Optional[str] = None, limit: int = 5) -> dict:
+    """참고 도서 목록(KCISA 기관별 도서정보 중 문학 자료)을 제목·저자·발행처로 찾는다 (서지 정보만)."""
+    return _call("search_books", keyword=keyword, genre=genre, limit=limit)
+
+
+@mcp.tool()
 def read_work(id: str) -> dict:
     """search_works 로 찾은 글(시계열 기록 또는 참고 작품 서재)의 저장된 본문을 읽는다."""
     return _call("read_work", id=id)

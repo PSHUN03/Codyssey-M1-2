@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 Genre = Literal[
     "시", "시조", "한시", "가사", "고전시가", "수필", "서간", "평론",
-    "소설", "단편소설", "중편소설", "장편소설", "동화", "희곡", "기타",
+    "소설", "단편소설", "중편소설", "장편소설", "동화", "희곡", "판소리", "노래", "기타",
 ]
 Stage = Literal["주제 선정", "구상·개요", "초고", "퇴고", "완성"]
 ChatStage = Literal["자유", "주제 선정", "구상·개요", "초고", "퇴고"]
@@ -263,3 +263,28 @@ class LibraryListOut(BaseModel):
     offset: int
     by_genre: list[GroupStat]
     items: list[LibraryOut]
+
+
+# ------------------------------------------------------------------ books (참고 도서 목록: KCISA 서지 정보)
+
+class BookOut(BaseModel):
+    id: str
+    title: str
+    author: Optional[str] = None
+    publisher: Optional[str] = None
+    genre: str
+    issued_date: Optional[str] = Field(default=None, description="기관 등록·디지털 발행일 (원작 발표일 아님)")
+    institution: Optional[str] = None
+    collection: Optional[str] = None
+    url: Optional[str] = None
+    copies: int = 1
+    wikisource_url: Optional[str] = Field(default=None, description="같은 작품의 위키문헌 원문 (중복 검토로 연결)")
+
+
+class BookListOut(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    by_genre: list[GroupStat]
+    source: Optional[str] = None
+    items: list[BookOut]

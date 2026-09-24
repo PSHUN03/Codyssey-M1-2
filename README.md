@@ -21,7 +21,7 @@
 - **구상·개요**: 장르별 뼈대(시: 이미지→정서 전환, 수필: 경험→사유, 소설: 인물·갈등·시점)와 **내 평균 분량 기준** 개요
 - **초고**: 막힌 장면의 다음 선택지, 최근 기록을 근거로 한 오늘의 목표 분량
 - **퇴고**: `analyze_text` 도구로 글자 수·문장 길이·반복어·반복 어미를 **실제로 측정한 뒤** `원문 → 수정안 (이유)` 형식으로 피드백
-- **참고 작품**: 위키문헌에서 모은 한국 문학 작품(퍼블릭 도메인, 15세기 시조 ~ 20세기 근대문학) 2,049편 중 필요한 예문을 찾아 인용
+- **참고 작품**: 위키문헌에서 모은 한국 문학 작품(퍼블릭 도메인, 15세기 시조 ~ 20세기 근대문학) 3,657편(시계열 2,613 + 발표 시기 미상 서재 1,044) 중 필요한 예문을 찾아 인용하고, 한국문화정보원 기관별 도서정보에서 고른 문학 도서 18,302권으로 더 읽을 책을 추천
 
 ## 2. 데이터: 시계열 글쓰기 기록
 
@@ -34,9 +34,12 @@
 
 데이터는 두 출처가 한 컬렉션에 섞여 있습니다.
 
-1. **위키문헌 작품 2,049편** — [한국어 위키문헌](https://ko.wikisource.org) MediaWiki API로 수집 ([`backend/scripts/import_wikisource.py`](backend/scripts/import_wikisource.py))
-   - 분류(시·시조·수필·단편/중편/장편소설·동화·희곡)와 시집·수필집 하위 작품을 순회
-   - **범위**: 장르 분류(시·시조·한시·가사·고전시가·수필·편지·평론·소설류·동화·희곡) + 연도별 작품 분류 전체(세기 → 연대 → 연도 224개) + 시집·수필집 하위 작품
+1. **위키문헌 작품 2,613편** — [한국어 위키문헌](https://ko.wikisource.org) MediaWiki API로 수집 ([`backend/scripts/import_wikisource.py`](backend/scripts/import_wikisource.py))
+   - **범위 (네 갈래로 찾고 한곳에서 거름)**
+     1. **문학 분류 트리**: `문학`·`장르별 문학`·`한국의 문학`·`시`·`소설`·`수필`·`희곡`·`동화`·`전승문학`·`아동문학`에서 하위 분류를 재귀로 내려가며 97개 분류 순회 (고전소설·신소설·판소리·한국의 노래·문학 평론 등 포함, 요리책·논문·수상자 인물 분류는 제외)
+     2. **연도별 작품 분류** 전체(세기 → 연대 → 연도 224개) — 이 경로로만 찾은 문서는 자기 장르 분류가 있어야 넣음
+     3. **저자 문서** 430명(시인·소설가·수필가·평론가 분류 + 수집한 작품의 지은이)의 작품 목록 링크 — 링크가 달린 **소제목(`== 소설 ==`, `=== 동시/동요 ===` …)으로 장르**를 정하고, 문학 작가 분류에 없고 문학 소제목도 없는 저자 문서(의서·실록 편찬자 등)의 '저작' 목록 284건은 제외
+     4. **목차 문서**: 시집·산문집·동화집처럼 **수록작이 각각 한 작품**인 문집(79개)은 수록작별로, 장편소설·희곡처럼 **장(章)으로 나뉜 한 작품**(73개, 예: 《무정》 7개 장, 《상록수》 17개 장, 《피노키오의 모험》)은 장 본문을 **합쳐 한 편**으로 셈 (하위 문서 이름이 대부분 `제1장`·`1`·`상권` 형식이면 장으로 판단)
    - **날짜**: 본문 끝의 창작일(예: `1941. 11. 20.`) → 설명란의 출전 발표 연·월·일(`1928년 7월 《조선지광》`, `〈조선〉, 1932.4.` 등 — 월까지 적혀 있으면 분류보다 우선) → 문서의 `NNNN년 작품` 분류 → **저자 문서의 작품 연보**(예: `* [[빈처]] (1921년)`) → 수록 시집 간행일(메모에 `수록 문집 간행 연도 기준`으로 표시). 날짜를 알 수 없는 작품은 추측하지 않고 제외
    - **신뢰성 규칙**
      - 시집 하위 문서는 '제목' 칸이 시집 이름이라 **'부제' 칸(또는 문서 경로)**에서 작품 제목을 읽고, 장르 분류에 함께 걸려 있어도 시집의 지은이·날짜를 물려받음 (예: 「나룻배와 행인」 ← 《님의 침묵》, 「가는 길」 ← 《진달래꽃》 1925-12-26)
@@ -44,15 +47,34 @@
      - 같은 지은이의 같은 작품이 여러 판본에 있으면(초판 시집과 후대 합본 등) **가장 정확하고 이른 날짜 하나**만 남김
      - 시집이 지은이 **사망 후 10년이 넘어** 나온 후대 판본이면(예: 1988년 선집 《향수》) 그 연도는 발표일이 아니므로 쓰지 않음 (사망 연도는 저자 문서 머리말에서 읽음). 사후 10년 이내의 유고 시집은 `사후 간행 문집`으로 표시
      - 시집의 서문·발문·후기 등 부속 글은 제외 (다른 사람이 쓴 경우가 많음)
-     - 번역 작품은 역자를 밝히고(《오뇌의 무도》 → `김억(옮김)`), 위키 사용자가 요즘 옮긴 번역문은 제외
-   - **실존 검증**: 전 작품을 문서 번호(pageid)로 다시 조회 → 시계열 2,049편 + 서재 571편 = 2,620편 모두 존재·제목 일치 ([`docs/data-verification.md`](docs/data-verification.md), `python -m scripts.verify_works`)
+     - 번역 작품은 역자를 밝히고(《오뇌의 무도》 → `김억(옮김)`), 위키 사용자가 요즘 옮긴 번역문·한국어 본문이 없는 외국어 원문은 제외
+     - 머리말 틀의 필드 이름이 문서마다 달라(`지은이`·`글쓴이`·`author`, `설명`·`notes`, 한 줄짜리 틀) 모두 인식하고, 각주 속 인용 틀의 `제목=`은 무시 (예: 《백범일지》 → 김구)
+     - 설명란의 날짜가 **대본으로 쓴 후대 판본**(`1971년 2월 1일 2판`)이면 발표일로 쓰지 않음 (예: 《담원시조》 1948)
+     - **저작권**: 한국 저작권법상 보호 기간이 끝난 **1962년 이전 사망 작가**의 작품만 수록. 위키문헌 라이선스 틀과 관계없이 1963년 이후 사망 작가(공동 작가 포함)의 작품 9편은 제외
+   - **실존 검증**: 전 작품을 문서 번호(pageid)로 다시 조회 → 시계열 2,613편 + 서재 1,044편 = 3,657편 모두 존재·제목 일치 ([`docs/data-verification.md`](docs/data-verification.md), `python -m scripts.verify_works`)
    - 요청 제한을 지키려고 요청 간격 1.5초 + `Retry-After` 재시도, 위키미디어 정책에 맞는 User-Agent(연락처 포함), 응답은 로컬 캐시(git 제외)
-   - 장르 분포: 시 1,423 · 수필 298 · 단편소설 170 · 시조 51 · 장편소설 33 · 서간 12 · 중편소설 12 · 동화 12 · 소설 9 · 가사 8 · 평론 8 · 희곡 7 · 한시 4 · 고전시가 2
+   - 장르 분포: 시 1,501 · 수필 389 · 단편소설 218 · 소설 191 · 시조 105 · 동화 63 · 장편소설 47 · 기타 20 · 한시 13 · 중편소설 13 · 희곡 12 · 서간 11 · 노래 10 · 평론 10 · 가사 8 · 고전시가 2
 2. **내가 쓴 기록** — 웹 화면의 '기록 관리' 탭이나 `POST /api/data`로 추가 (`source = "직접 작성"`). 본문을 붙여넣으면 전문이 함께 저장되어 AI가 `read_work`로 읽고 퇴고를 도울 수 있음
-3. **참고 작품 서재 571편 (발표 시기 미상)** — 장르: 시 242 · 시조 181 · 수필 43 · 한시 35 · 고전시가 27 · 단편소설 16 · 가사 12 · 소설 4 · 희곡 4 · 서간 3 · 평론 2 · 장편소설 2
+3. **참고 작품 서재 1,044편 (발표 시기 미상)** — 장르: 시 241 · 시조 226 · 노래 226 · 기타 65 · 수필 63 · 한시 62 · 소설 50 · 고전시가 38 · 서간 20 · 가사 17 · 단편소설 15 · 판소리 7 · 희곡 5 · 평론 3 · 장편소설 3 · 동화 3
    — 위키문헌에 실제로 있지만 **발표 시기를 확인할 수 없는** 작품. 날짜를 추측해 넣지 않고 별도 컬렉션 `library`에 담아 **요약·추세 통계에서는 빼고**, AI 작품 검색(`search_works`)·원격 MCP·기록 관리의 '참고 작품 서재' 목록에서만 씀
    - 본문이 스캔본 페이지에서 불러오는 형식(`<pages index=…>`)인 문서는 위키문헌이 **렌더링한 본문**을 받아 글자 수를 셈 (머리말 상자·쪽번호·각주·옛한글 안내 상자·라이선스 안내는 제외)
    - 이미 날짜와 함께 수록된 작품의 다른 판본, 서재 안의 중복은 제외
+4. **참고 도서 목록 18,302권 (서지 정보)** — [한국문화정보원 문화 공공데이터광장](https://www.culture.go.kr/data) `문화체육관광부 외_기관별 도서정보`(API_LIB_051) ([`import_kcisa.py`](backend/scripts/import_kcisa.py), [`kcisa_build.py`](backend/scripts/kcisa_build.py))
+   - 이 API는 검색 조건 없이 전체 **390,565건**을 1,000건씩 391쪽으로만 주므로 전 쪽을 받아(동시 4개 요청, 이어받기 가능) 로컬에서 문학 자료만 고름
+   - 선별: 한국문학번역원 근대문학 전부 + 제목·자료 형식에 문학 형식이 드러난 자료(`공연대본`·희곡, 시집·시조집, 소설집·장편소설, 수필·에세이, 동화, 평론·비평, 문학전집·작품집). `[CD]`·`[DVD]`·공연 프로그램·도면 등 비문학 형식, '시집가는 날'·'인문학의 다섯 시선'처럼 낱말만 겹치는 제목, 음악·무용·미술 평론은 제외
+   - 장르: 희곡(공연대본) 10,237 · 평론 2,569 · 시 1,980 · 기타 1,156 · 소설 1,025 · 수필 988 · 동화 324 · 단편소설 20 · 중편소설 2 · 장편소설 1 / 소장 기관: 한국문화예술위원회 예술자료원 18,101 · 국립어린이청소년도서관 142 · 한국문학번역원 51 · 문화체육관광부 8
+   - **본문이 없고** `ISSUED_DATE`도 원작 발표일이 아니라 기관의 등록·디지털화 날짜여서 **시계열로 쓰지 않고 참고용**으로만 씀: `GET /api/books`, AI 도구 `search_books`(읽을거리 추천), 기록 관리의 '참고 도서 목록'
+   - 읽기 전용이라 Firestore 대신 백엔드에 포함한 JSON(`data/kcisa_books.json`)을 메모리에서 검색 → Firestore 무료 한도(읽기 5만·쓰기 2만/일)를 쓰지 않음
+
+**중복 검토** ([`docs/duplicates-report.md`](docs/duplicates-report.md), `python -m scripts.review_duplicates`)
+
+| 구분 | 결과 | 처리 |
+|---|---|---|
+| 위키문헌 — 같은 작품의 여러 판본 | 82편 | 날짜 근거가 가장 정확하고 이른 판본 하나만 |
+| 위키문헌 — 서재 안의 중복·날짜 있는 판본과 겹침 | 150편 | 날짜 있는 판본 우선, 서재 안에서는 본문이 긴 쪽 |
+| KCISA — 같은 책의 소장본 여러 권 | 712권 | 한 권으로 합치고 `copies`에 권수 기록 |
+| KCISA — 같은 제목·작가, 발행처가 다른 판본 | 197종 | 서로 다른 판본이라 유지 |
+| 위키문헌 ↔ KCISA — 같은 작가·같은 제목 | 38건 | 지우지 않고 도서에 위키문헌 원문 링크(`wikisource_url`) 연결, 장르가 없던 번역원 자료는 원문 장르를 따름 |
 
 자세한 분석 결과(연대별·장르별 통계, 날짜 정밀도, 작가 순위)는 [`docs/data-analysis.md`](docs/data-analysis.md) — `python -m scripts.analyze_data`가 서비스와 같은 요약 함수로 생성합니다.
 
@@ -68,12 +90,12 @@
 | 영역 | 사용 기술 |
 |---|---|
 | 백엔드 | Python 3.12, FastAPI, Pydantic v2, Uvicorn |
-| DB | Firebase Firestore (`firebase-admin`) — 컬렉션 `data`, `conversations` |
+| DB | Firebase Firestore (`firebase-admin`) — 컬렉션 `data`, `conversations`, `library` (+ 읽기 전용 참고 도서 JSON) |
 | AI | OpenAI Chat Completions API + Function Calling — 모델 `gpt-5.4-mini` (Codyssey OpenAI 호환 게이트웨이 `OPENAI_BASE_URL` 경유, 개인 OpenAI 키면 주소만 비우면 됨) |
-| 테스트 | pytest 11개 (메모리 저장소 + 가짜 GPT 클라이언트) |
+| 테스트 | pytest 18개 (메모리 저장소 + 가짜 GPT 클라이언트) |
 | 프론트엔드 | HTML / CSS / JavaScript (프레임워크·차트 라이브러리 없이 SVG 직접 렌더링) |
 | 배포 | Render (백엔드), Vercel (프론트엔드) |
-| 보너스 | MCP 서버 (`mcp` Python SDK v2, stdio) |
+| 보너스 | MCP 서버 (`mcp` Python SDK v2 — 원격 Streamable HTTP `/mcp` + 로컬 stdio) |
 
 ## 4. 프로젝트 구조
 
@@ -91,21 +113,23 @@ writing-assistant/
 │  │  ├─ seed.py               # 수집 데이터 → data(시계열) · library(발표 시기 미상) 적재
 │  │  ├─ rate_limit.py         # /api/chat 요청 횟수 제한
 │  │  ├─ mcp_remote.py         # (보너스) 원격 MCP 서버 /mcp
-│  │  ├─ routers/              # HTTP 계층: data, library, conversations, chat
-│  │  └─ services/             # 비즈니스 로직: data, library, summary, conversation, chat, tools
+│  │  ├─ routers/              # HTTP 계층: data, library, books, conversations, chat
+│  │  └─ services/             # 비즈니스 로직: data, library, books, summary, conversation, chat, tools
 │  ├─ scripts/
 │  │  ├─ import_wikisource.py  # 위키문헌 API 수집 → data/wikisource_works.json
+│  │  ├─ import_kcisa.py       # KCISA 기관별 도서정보 전체 다운로드 → kcisa_build.py 로 문학 자료 선별
+│  │  ├─ review_duplicates.py  # 출처 간·출처 내 중복 검토 → docs/duplicates-report.md
 │  │  ├─ seed_firestore.py     # JSON → Firestore 적재
 │  │  ├─ analyze_data.py       # 분석 리포트 → docs/data-analysis.md
 │  │  ├─ verify_works.py       # 전 작품 실존 재검증 → docs/data-verification.md
 │  │  └─ mcp_smoke_test.py     # MCP 클라이언트로 원격/stdio 도구 호출 검증
 │  ├─ tests/                   # pytest
-│  └─ data/wikisource_works.json
+│  └─ data/ (wikisource_works.json, kcisa_books.json)
 ├─ frontend/
 │  ├─ build.js                 # Vercel 빌드: API_BASE_URL → config.js, 자산 주소에 배포 버전(?v=) 부착
 │  ├─ vercel.json
 │  └─ public/ (index.html, styles.css, config.js, js/*.js)
-├─ docs/ (data-analysis.md, data-verification.md, capture_screenshots.py, screenshots/)
+├─ docs/ (data-analysis.md, data-verification.md, duplicates-report.md, capture_screenshots.py, screenshots/)
 └─ render.yaml                 # Render Blueprint
 ```
 
@@ -124,6 +148,7 @@ writing-assistant/
 | GET | `/api/data/statistics` | (보너스) 연대/연도/월별 시계열, 다작 작가, 기록 일수, 최장 연속 기록 |
 | GET | `/api/data/export?format=csv\|json` | (보너스) 내보내기 다운로드 |
 | GET | `/api/library` | 참고 작품 서재 (발표 시기 미상 작품, 검색·장르 필터·페이지, 시계열 통계 제외) |
+| GET | `/api/books` | 참고 도서 목록 (KCISA 문학 자료 서지 정보, 검색·장르 필터·페이지, 시계열 통계 제외) |
 | POST | `/api/conversations` | 대화 저장 |
 | GET | `/api/conversations` | 대화 목록 — **messages 미포함**(`message_count`, `preview`만) |
 | GET | `/api/conversations/{id}` | 특정 대화 전체 messages 불러오기 (요구사항 A 방식) |
@@ -169,7 +194,7 @@ writing-assistant/
 | Delete | `document(id).delete()` — 없는 ID는 404 |
 | 대량 적재 | `db.batch()` 400건씩 `commit()` (시드 스크립트) |
 
-- 이 서버를 거친 쓰기는 **바뀐 문서만 캐시에 반영**해서 다음 요약·채팅이 곧바로 최신 데이터를 보면서도, 기록 1건 저장에 2,049건을 다시 읽지 않습니다 (Firestore 무료 한도: 하루 읽기 5만 회). 캐시는 1시간마다 새로 읽습니다.
+- 이 서버를 거친 쓰기는 **바뀐 문서만 캐시에 반영**해서 다음 요약·채팅이 곧바로 최신 데이터를 보면서도, 기록 1건 저장에 2,600여 건을 다시 읽지 않습니다 (Firestore 무료 한도: 하루 읽기 5만 회). 캐시는 1시간마다 새로 읽습니다.
 - 서비스 계정 키는 `FIREBASE_SERVICE_ACCOUNT_JSON`(배포) 또는 `FIREBASE_CREDENTIALS_PATH`(로컬)로만 받고, Firestore 보안 규칙은 **프로덕션 모드(클라이언트 직접 접근 차단)** 입니다. 브라우저는 반드시 백엔드 API를 거칩니다.
 
 ## 7. 컨텍스트 주입과 AI 호출 흐름
@@ -205,7 +230,7 @@ POST /api/chat
 - 구조 → 문단 → 문장 → 단어 순서로 점검 …
 ```
 
-**원리**: GPT는 우리 DB를 모르므로 매 요청마다 "지금 이 사용자의 데이터는 이렇다"는 사실을 시스템 메시지로 넣어 줍니다. 전체 레코드(2,049+건)를 넣으면 토큰이 크게 늘어나므로 **요약만** 넣고, 더 자세한 정보(특정 작품 본문, 기간별 통계, 이전 대화)는 모델이 필요할 때 도구로 가져오게 했습니다.
+**원리**: GPT는 우리 DB를 모르므로 매 요청마다 "지금 이 사용자의 데이터는 이렇다"는 사실을 시스템 메시지로 넣어 줍니다. 전체 레코드(2,600+건)를 넣으면 토큰이 크게 늘어나므로 **요약만** 넣고, 더 자세한 정보(특정 작품 본문, 기간별 통계, 이전 대화)는 모델이 필요할 때 도구로 가져오게 했습니다.
 
 ## 8. (보너스) Function Calling — 어떤 근거로 어떤 도구를 부르나
 
@@ -216,6 +241,7 @@ POST /api/chat
 | `get_data_summary` | 특정 장르·기간·'내 기록만'의 요약이 필요할 때 | `summary_service.get_summary(**filters)` |
 | `get_statistics` | 연도/월/연대별 흐름, 다작 작가, 연속 기록을 물을 때 | `summary_service.get_statistics()` |
 | `search_works` | 예문·참고 작품·특정 작가의 글·내가 예전에 쓴 글을 찾을 때 | 시계열 기록 + 참고 작품 서재를 함께 검색, 관련도(제목 일치 > 제목 포함 > 지은이 > 본문) 순 + 본문 발췌 |
+| `search_books` | 더 읽어 볼 책(시집·소설집·희곡 대본·평론집 등)을 추천할 때 | KCISA 참고 도서 목록을 제목·저자·발행처로 검색 (서지 정보만) |
 | `read_work` | 사용자가 저장해 둔 자기 글을 퇴고해 달라고 할 때, 참고 작품의 긴 본문이 필요할 때 | 저장된 본문(최대 8,000자)을 읽음 |
 | `list_my_records` | 최근 작업 내역, 단계별 진행 상황이 필요할 때 | `data_service.list_records(mine=True)` |
 | `list_conversations` / `get_conversation` | "지난번에 얘기한 것"을 언급할 때 | `conversation_service` |
@@ -257,7 +283,7 @@ POST /api/chat
    └─ stdio ──▶ mcp_server.py ──HTTP──▶ Render /api/* ──▶ Firestore
 ```
 
-도구: 원격 9개 — `get_data_summary`, `get_statistics`, `search_works`, `read_work`, `list_my_records`, `list_conversations`, `get_conversation`, `analyze_text`, `add_writing_record` / 로컬 stdio 7개 (REST API 에 없는 `read_work`·`analyze_text` 제외)
+도구: 원격 10개 — `get_data_summary`, `get_statistics`, `search_works`, `search_books`, `read_work`, `list_my_records`, `list_conversations`, `get_conversation`, `analyze_text`, `add_writing_record` / 로컬 stdio 7개 (REST API 에 없는 `search_books`·`read_work`·`analyze_text` 제외)
 
 - 원격 MCP는 **DNS 리바인딩 방어**로 허용된 Host(`MCP_ALLOWED_HOSTS`)만 받고, 무료 서버의 재시작·슬립에 대비해 세션 없이(stateless) 요청마다 처리합니다.
 - 연결 예시
@@ -330,7 +356,8 @@ python -m scripts.seed_firestore  # 위키문헌 작품을 Firestore에 적재 (
 uvicorn main:app --reload         # http://localhost:8000/docs
 ```
 
-- 위키문헌 데이터를 새로 수집하려면 `python scripts/import_wikisource.py` (요청 제한 때문에 10분 이상 걸림)
+- 위키문헌 데이터를 새로 수집하려면 `python scripts/import_wikisource.py` (요청 제한 때문에 처음에는 1시간 이상, 캐시가 있으면 1분 안팎)
+- 참고 도서 목록을 새로 만들려면 `.env`에 `KCISA_API_KEY`를 넣고 `python -m scripts.import_kcisa download` (전체 391쪽, 약 1시간) → `python -m scripts.import_kcisa build` → `python -m scripts.review_duplicates`
 - Firebase 키 없이 화면만 확인하려면 `.env`에 `STORAGE_BACKEND=memory` (서버를 재시작하면 데이터가 초기화됨)
 
 ### 프론트엔드
@@ -345,7 +372,7 @@ python -m http.server 5500        # http://localhost:5500
 ```bash
 cd backend
 pip install -r requirements-dev.txt
-pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 실행됨
+pytest -q                          # 18 passed — Firebase·OpenAI 키 없이 실행됨
 ```
 
 `public/config.js`의 기본 API 주소는 `http://localhost:8000`입니다.
@@ -368,6 +395,7 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 | `MAX_TOOL_ROUNDS` | | 채팅 1회당 도구 호출 반복 상한, 기본 3 |
 | `CHAT_HISTORY_LIMIT` | | GPT에 함께 보내는 이전 메시지 수, 기본 10 |
 | `STORAGE_BACKEND` | | `firestore`(기본) / `memory`(로컬 확인용) |
+| `KCISA_API_KEY` | | (수집 스크립트 전용) 한국문화정보원 서비스 키 — `scripts/import_kcisa.py`에서만 쓰고 배포 서버에는 넣지 않음 |
 
 ### 프론트엔드 (Vercel)
 
@@ -403,7 +431,7 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 
 - **요청 횟수 제한**: `/api/chat`은 IP별 분당 6회, 서버 전체 하루 300회를 넘으면 `429`와 안내 문구를 돌려줌 ([`app/rate_limit.py`](backend/app/rate_limit.py))
 - **토큰 제한**: `max_completion_tokens`(기본 1200), 도구 반복 최대 3회, 이전 대화 10개까지만 전송
-- **작은 데이터로 먼저 검증**: Firestore에 `seed_firestore --limit 20`으로 20건만 넣고 채팅 2회(요약 질문, 퇴고 요청)로 흐름을 확인한 뒤 `--reset`으로 전체 적재 (현재 2,049건)
+- **작은 데이터로 먼저 검증**: Firestore에 `seed_firestore --limit 20`으로 20건만 넣고 채팅 2회(요약 질문, 퇴고 요청)로 흐름을 확인한 뒤 `--reset`으로 전체 적재 (현재 data 2,614건 · library 1,044건)
 - 전체 데이터 대신 요약만 프롬프트에 넣음
 - 요약·검색용 전체 레코드는 서버 메모리에 캐시하고 쓰기는 바뀐 문서만 반영해 Firestore 읽기 횟수 절약
 
@@ -435,7 +463,7 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 
 | # | 과제 목표 | 이 프로젝트에서의 답 | 근거 |
 |---|---|---|---|
-| 1 | 시계열 분석 → 요약 → 서비스 활용 | 위키문헌 2,049편 + 내 기록을 날짜순으로 정렬해 통계·추세를 계산하고, 그 요약을 채팅 프롬프트·요약 패널·통계 탭이 함께 씀 | §2, [`summary_service.py`](backend/app/services/summary_service.py), [`docs/data-analysis.md`](docs/data-analysis.md) |
+| 1 | 시계열 분석 → 요약 → 서비스 활용 | 위키문헌 2,613편 + 내 기록을 날짜순으로 정렬해 통계·추세를 계산하고, 그 요약을 채팅 프롬프트·요약 패널·통계 탭이 함께 씀 | §2, [`summary_service.py`](backend/app/services/summary_service.py), [`docs/data-analysis.md`](docs/data-analysis.md) |
 | 2 | 라우터/서비스 분리 기준 | 라우터 = HTTP 규약(경로·쿼리·상태 코드), 서비스 = 비즈니스 로직, storage = DB. 채팅과 도구가 REST와 같은 서비스 함수를 재사용 | §4 |
 | 3 | Pydantic 검증 이유와 방식 | 잘못된 값이 통계·AI 답변을 오염시키지 않도록 요청 단계에서 차단. `Field` 범위, `Literal` 장르/단계, 미래 날짜·공백 검사 validator, PUT 빈 요청 거부 | §5, [`schemas.py`](backend/app/schemas.py) |
 | 4 | Firestore 저장과 CRUD | `data`(1건 = 1문서), `conversations`(대화 1개 = 1문서 + messages 배열), add/stream/get/update/delete/batch | §6 |
@@ -447,7 +475,7 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 | 요구사항 | 구현 위치 / 확인 방법 |
 |---|---|
 | Python 3.10+ venv, fastapi·uvicorn·firebase-admin·openai·python-dotenv | [`requirements.txt`](backend/requirements.txt), Render는 Python 3.12.8 |
-| 100개 이상 시계열 + 요약 정보 | 2,049건 (전 작품 위키문헌 실존 재조회: [`docs/data-verification.md`](docs/data-verification.md)), `GET /api/data/summary` |
+| 100개 이상 시계열 + 요약 정보 | 2,614건 (전 작품 위키문헌 실존 재조회: [`docs/data-verification.md`](docs/data-verification.md)), `GET /api/data/summary` |
 | CORS, `uvicorn main:app --reload`, `/docs` | [`main.py`](backend/main.py) |
 | Firestore, 키 환경 변수 관리, `data`·`conversations` 컬렉션 | §6 |
 | 데이터 API 5개 (CRUD 4 + summary) | §5 |
@@ -468,8 +496,12 @@ pytest -q                          # 11 passed — Firebase·OpenAI 키 없이 �
 |---|---|---|
 | 채팅 답변 뒤 `⚠ Cannot set properties of null (setting 'textContent')` 오류 말풍선 | 새로 추가한 저장 표시(`#save-state`)를 쓰는 **새 JS가 캐시된 옛 HTML 위에서** 실행됨 (탭을 업데이트 전에 열어뒀거나, 캐시 제어가 약한 로컬 정적 서버). 서버는 이미 답변을 만들고 대화도 저장했는데, 화면 갱신 오류를 '전송 실패'로 표시하고 입력을 되돌려 **같은 질문을 다시 보내게** 만드는 설계 결함이 있었음 | ① 서버 요청 오류와 응답 표시 오류를 분리: 응답을 받은 뒤의 화면 오류는 실패로 알리지 않고 입력도 되돌리지 않음 ② 선택적 UI 요소가 없으면 조용히 건너뜀 ③ Vercel 빌드에서 HTML의 CSS·JS 주소와 JS 모듈 import 경로에 배포 버전(`?v=커밋`)을 붙이고 HTML은 `Cache-Control: no-cache` → 옛 HTML과 새 JS가 섞이지 않음 |
 | 위키문헌 수집 중 1분마다 `HTTP 429` | 연락처 없는 일반 User-Agent가 엄격하게 제한됨 | 위키미디어 정책대로 User-Agent에 저장소 주소 포함 → 429 0회 |
+| KCISA 도서정보 API에 검색 조건을 넣어도 전체 결과가 옴 | 이 API는 `serviceKey`·`numOfRows`·`pageNo` 외 조건을 받지 않음 (39만 건, 한 쪽 응답에 30초 이상) | 전 쪽을 받아 로컬에서 선별. 동시 4개 요청 + 쪽 단위 이어받기(`.part` 임시 파일) |
+| 저자 문서로 찾은 작품에 의서(《언해태산집요》)·《태조실록》이 섞이고 장편 《영원의 미소》가 '기타'로 분류 | 저자 문서의 모든 링크를 문학 작품으로 간주 | 링크가 달린 소제목으로 장르를 정하고, 문학 작가 분류·문학 소제목이 모두 없는 저자 문서의 목록은 제외 |
+| 장편의 장(「38. 몰래 엿들은 은주의 노래」, 「5」)이 각각 한 작품으로 들어감 | 목차 문서를 장르로만 시집형/연재형으로 나눔 | 하위 문서 이름이 대부분 장 번호 형식이면 연재형으로 합산 |
 | Render가 GitHub 푸시로 재배포되지 않음 | 서비스를 공개 저장소 URL로 만들어 GitHub 앱 연결이 없음 | 대시보드 Manual Deploy / Render MCP `trigger_deploy`로 재배포 |
 
 ## 18. 데이터 출처 및 라이선스
 
-작품 데이터는 [한국어 위키문헌](https://ko.wikisource.org)의 퍼블릭 도메인 저작물(저작권 보호 기간 만료)이며, 각 레코드의 `url`에 원문 링크를 남겼습니다.
+- 작품 데이터는 [한국어 위키문헌](https://ko.wikisource.org)의 퍼블릭 도메인 저작물(저작권 보호 기간 만료 — 1962년 이전 사망 작가·작자 미상 고전)이며, 각 레코드의 `url`에 원문 링크를 남겼습니다.
+- 참고 도서 목록은 [한국문화정보원 문화 공공데이터광장](https://www.culture.go.kr/data) 오픈 API(`문화체육관광부 외_기관별 도서정보`)의 서지 정보(제목·저자·발행처·소장 기관·자료 URL)이며 본문은 저장하지 않습니다. 이용 조건은 포털 이용약관을 따르고, 각 도서의 `url`에 소장 기관 자료 링크를 남겼습니다.
