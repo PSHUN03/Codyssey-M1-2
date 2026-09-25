@@ -156,10 +156,19 @@ def year_in(s: str | None, lo: int = 1400, hi: int = 2026) -> int | None:
     return None
 
 
+CONTACT = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+|(?<!\d)0\d{1,2}-\d{3,4}-\d{4}(?!\d)")
+
+
+def no_contact(s: str | None) -> str:
+    """원 서지의 저자 칸 등에 잘못 들어간 개인 이메일·전화번호는 지운다 (공개 저장소·API 로 내보내므로)."""
+    s = CONTACT.sub("", clean(s))
+    return re.sub(r"\s*,\s*(,\s*)+", ", ", s).strip(" ,;")
+
+
 def row(title, author, genre, year, basis, url=None, publisher=None, language=None, note=None, **extra) -> dict:
-    return {"title": clean(title)[:150], "author": clean(author)[:80] or None, "genre": genre, "year": year,
-            "basis": basis if year else "발표 시기 미상", "url": url or None, "publisher": clean(publisher)[:80] or None,
-            "language": language or None, "note": clean(note)[:200] or None, **extra}
+    return {"title": clean(title)[:150], "author": no_contact(author)[:80] or None, "genre": genre, "year": year,
+            "basis": basis if year else "발표 시기 미상", "url": url or None, "publisher": no_contact(publisher)[:80] or None,
+            "language": language or None, "note": no_contact(note)[:200] or None, **extra}
 
 
 # ---------------------------------------------------------------- 자료별 선별
@@ -250,7 +259,7 @@ def build_recommend(name: str) -> list[dict]:
         y = re.search(r"｜\s*(1[89]\d\d|20[0-2]\d)(?!\d)", desc[:200])
         year = int(y.group(1)) if y else None
         rows.append(row(title, re.sub(r"\s*(지음|글|저|옮김|그림).*$", "", author.split("//")[0]), genre, year,
-                        "발행 연도", it.get("url"), note=desc[:160]))
+                        "발행 연도", it.get("url")))  # 소개글은 기관이 쓴 창작 글이라 저장하지 않고 링크로 본다
     return rows
 
 

@@ -82,7 +82,8 @@ def export_wikisource(folder: str) -> dict:
         f"- 작품 수: **{len(rows):,}편** (시계열 {len(works['records']):,} + 발표 시기 미상 {len(works['library']):,})",
         "- 본문: `본문/<장르>/<지은이> - <제목> (<날짜>).txt` — 파일 맨 위에 제목·지은이·날짜 근거·원문 링크",
         "- 목록: [`목록.csv`](목록.csv) (엑셀로 열림)",
-        "- 라이선스: 퍼블릭 도메인 — 1962년 이전에 사망한 작가·작자 미상 고전만 수록",
+        "- 라이선스: 퍼블릭 도메인 — 1962년 이전에 사망한 작가·작자 미상 고전만 수록. 번역 작품은 번역자와 원작자가 모두 "
+        "1962년 이전에 사망한 경우만 (위키문헌 사용자가 최근 옮긴 번역문은 제외)",
         "- 장편·연재물은 장별 문서를 목차 순서로 이어 붙였고(【장 제목】으로 구분), 스캔본 문서는 위키문헌이 렌더링한 본문",
         "",
         "| 장르 | 편 수 |",
@@ -93,14 +94,14 @@ def export_wikisource(folder: str) -> dict:
 
 
 # ---------------------------------------------------------------- 구텐베르크 (전체 본문)
-def gutenberg_body(url: str) -> str:
+def gutenberg_text(url: str) -> str:
+    """구텐베르크 원본 텍스트 그대로 (머리말·라이선스 포함).
+    Project Gutenberg 라이선스는 원본을 그대로 재배포하거나, 머리말·라이선스와 'Project Gutenberg' 언급을 모두
+    지운 경우에만 자유롭게 쓰도록 하므로, 원본을 고치지 않고 그대로 둔다."""
     gid = url.rstrip("/").split("/")[-1]
     req = urllib.request.Request(f"https://www.gutenberg.org/ebooks/{gid}.txt.utf-8", headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=120) as res:
-        text = res.read().decode("utf-8", "replace")
-    start = re.search(r"\*\*\* ?START OF (THE|THIS) PROJECT GUTENBERG.*?\*\*\*", text)
-    end = re.search(r"\*\*\* ?END OF (THE|THIS) PROJECT GUTENBERG", text)
-    return text[start.end() if start else 0:end.start() if end else len(text)].strip()
+        return res.read().decode("utf-8", "replace")
 
 
 def export_gutenberg(folder: str) -> dict:
@@ -108,15 +109,11 @@ def export_gutenberg(folder: str) -> dict:
     base = OUT / folder
     rows = []
     for w in works:
-        rel = Path("본문") / f"{safe(w['title'], 70)} ({w['date'][:4]}).txt"
+        gid = w["url"].rstrip("/").split("/")[-1]
+        rel = Path("본문") / f"pg{gid} - {safe(w['title'], 60)}.txt"
         (base / rel).parent.mkdir(parents=True, exist_ok=True)
-        if not (base / rel).exists():
-            body = gutenberg_body(w["url"])
-            head = [f"Title: {w['title']}", f"Author: {w['author'] or ''}", f"First published: {w['date'][:4]}",
-                    f"장르: {w['genre']} · {w['note']}", f"Source: {w['url']} (Project Gutenberg, public domain)",
-                    "", "-" * 40, ""]
-            (base / rel).write_text("\n".join(head) + body + "\n", encoding="utf-8")
-            time.sleep(1)
+        (base / rel).write_text(gutenberg_text(w["url"]), encoding="utf-8")
+        time.sleep(1)
         rows.append([w["date"][:4], w["genre"], w["title"], w["author"] or "", w["chars"], w["url"], rel.as_posix()])
     write_csv(base / "목록.csv", ["초판 연도", "장르", "제목", "저자", "글자 수(공백 제외)", "링크", "본문 파일"], rows)
     write_readme(base / "README.md", [
@@ -124,8 +121,10 @@ def export_gutenberg(folder: str) -> dict:
         "",
         "- 출처: [Project Gutenberg](https://www.gutenberg.org) (`backend/scripts/import_gutenberg.py`)",
         f"- 작품 수: **{len(rows)}편** — 한국어 책은 사전 1권뿐이라 주제어 Korea 36권 중 설화·소설·아동문학만",
-        "- 본문: `본문/*.txt` (구텐베르크 머리말·라이선스 꼬리말을 뺀 본문)",
-        "- 라이선스: 퍼블릭 도메인 (초판 1889~1922, 작가 모두 1945년 이전 사망)",
+        "- 본문: `본문/pg<번호> - <제목>.txt` — 구텐베르크가 배포하는 원본 파일을 **머리말·라이선스까지 그대로** 둠 "
+        "(Project Gutenberg 라이선스 조건)",
+        "- 저작권: 초판 1889~1922, 저자·옮긴이 모두 1963년 이전 사망 (Allen 1932, Barnes 1943, Pike 1949, "
+        "Stratemeyer 1930, Gale 1937, Taylor 1955, 홍종우 1913, Griffis 1928) → 한국·미국 모두 퍼블릭 도메인",
         "",
         "| 초판 | 제목 | 저자 |",
         "|---|---|---|",

@@ -118,7 +118,14 @@ TRANSLATED_COLLECTIONS = {"오뇌의 무도"}
 COPYRIGHT_CUTOFF = 1963
 # 저자 문서가 없는 연작소설 공동 작가 등의 사망 연도
 KNOWN_DEATHS = {"박화성": 1988, "최정희": 1990, "이은상": 1982, "주요한": 1979, "김기진": 1985, "염상섭": 1963,
-                "박세영": 1989, "김광균": 1993}
+                "박세영": 1989, "김광균": 1993,
+                "이원수": 1981, "정인섭": 1983,  # 번역자 (번역문에는 번역자의 저작권이 따로 있다)
+                "윤일주": 1985,  # 윤동주 유고 시집의 후기 필자
+                # 번역 원작자: 원작의 보호 기간이 남아 있으면 오래된 번역문도 공개할 수 없다
+                "정서림": 1974, "서순": 1967, "언터마이어": 1977, "마거릿 위더머": 1978, "휠록": 1978,
+                "존 메이스필드": 1967}
+# 위키문헌 사용자가 최근에 옮긴 번역문 (퍼블릭 도메인이 아니라 CC BY-SA) — 역자 칸이 사용자 이름
+WIKI_USER_TRANSLATORS = {"연필"}
 POSTHUMOUS_LIMIT = 10  # 사망 후 이 햇수를 넘겨 나온 문집의 연도는 쓰지 않는다
 MIN_CHARS = 20
 TEXTS: dict[int, str] = {}  # 문서 번호 → 전체 본문 (sources/ 폴더용, data/.wikisource_texts.json)
@@ -839,12 +846,18 @@ def main() -> None:
 
     def protected(r: dict) -> bool:
         name = r["author"].replace("(옮김)", "")
-        return any(death_by_name.get(n, 0) >= COPYRIGHT_CUTOFF for n in [name, *re.split(r"[\s,·]+", name)])
+        tr = re.search(r"· ([^—·]+?) 옮김 —", r["memo"])
+        names = [name, *re.split(r"[\s,·]+", name)]
+        if tr:
+            if tr.group(1).strip() in WIKI_USER_TRANSLATORS:
+                return True
+            names += [tr.group(1).strip(), *re.split(r"[\s,·]+", tr.group(1).strip())]
+        return any(death_by_name.get(n, 0) >= COPYRIGHT_CUTOFF for n in names)
 
     before = len(records) + len(library)
     records = [r for r in records if not protected(r)]
     library = [r for r in library if not protected(r)]
-    skipped["저작권 보호 기간(1963년 이후 사망 작가)"] = before - len(records) - len(library)
+    skipped["저작권 보호 기간(1963년 이후 사망 작가·번역자) · 위키 사용자 번역"] = before - len(records) - len(library)
 
     by_pageid: dict[int, dict] = {}
     for r in records:  # 넘겨주기로 같은 문서를 가리키면 날짜 근거가 더 정확하고 이른 쪽을 남긴다
