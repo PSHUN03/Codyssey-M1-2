@@ -93,6 +93,7 @@ with sync_playwright() as p:
     # 4) 통계 + 그래프
     page.goto(f"{FRONT}/#/insights")
     page.wait_for_selector("#chart svg", timeout=60_000)
+    page.wait_for_selector("#ov-chart svg", timeout=60_000)  # 모든 자료 한눈에 (통합 통계)
     page.wait_for_selector("#toast", state="hidden", timeout=10_000)  # 이전 화면의 알림이 겹치지 않게
     page.wait_for_timeout(800)
     shot(page, "insights")

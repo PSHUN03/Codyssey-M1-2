@@ -29,7 +29,7 @@ function legend(d) {
   const hint = $("#ov-hint");
   if (hint) hint.textContent = big && !state.hidden.has("kcisa")
     ? "KCISA 자료는 대부분 기관 등록 연도(2010년대) 기준이라 막대가 커요. 범례에서 KCISA를 끄면 다른 출처의 흐름이 잘 보여요."
-    : "범례를 눌러 출처를 켜고 끌 수 있어요. 세로 눈금은 보이는 출처에 맞춰 다시 계산돼요.";
+    : "범례를 눌러 출처를 켜고 끌 수 있어요. 세로 눈금은 시기가 확인된 막대 기준이고, 더 큰 '시기 미상' 막대는 물결 표시로 잘라 실제 건수를 적었어요.";
   $("#ov-legend").innerHTML = d.sources.map((s) => `
     <button type="button" class="ov-chip" data-key="${esc(s.key)}" aria-pressed="${!state.hidden.has(s.key)}"
       title="${esc(s.label)} · 연도 기준: ${esc(s.date_basis)}${s.has_text ? " · 본문 있음" : " · 목록 정보"}">
@@ -60,7 +60,10 @@ function chart(d) {
   const m = { t: 22, r: 8, b: 34, l: 56 };
   const iw = W - m.l - m.r;
   const ih = H - m.t - m.b;
-  const max = niceMax(Math.max(...cols.map(sum)));
+  // 세로 눈금은 시기가 확인된 막대 기준 — 시기 미상 막대가 더 크면 위를 잘라 물결 표시와 실제 건수를 단다
+  const datedCols = cols.filter((c) => !c.undated);
+  const max = niceMax(Math.max(...(datedCols.length ? datedCols : cols).map(sum)));
+  const clipped = (c) => c.undated && sum(c) > max;
   const gap = hasUndated ? 14 : 0; // 시기 미상 막대 앞 간격
   const band = (iw - gap) / cols.length;
   const bw = Math.max(3, Math.min(28, band - 3));
@@ -72,15 +75,20 @@ function chart(d) {
   const bars = cols.map((c, i) => {
     let acc = 0;
     const x = xOf(i) + (band - bw) / 2;
+    const scale = clipped(c) ? max / sum(c) : 1; // 잘린 막대는 출처 비율만 유지
     const rects = keys.map((k) => {
-      const v = c.parts[k];
+      const v = c.parts[k] * scale;
       if (!v) return "";
       const y0 = y(acc + v);
       const h = Math.max(1, y(acc) - y0);
       acc += v;
       return `<rect x="${x}" y="${y0}" width="${bw}" height="${h}" fill="${color(k)}"></rect>`;
     }).join("");
-    return `<g class="stack" data-i="${i}">${rects}</g><rect class="hit" data-i="${i}" x="${xOf(i)}" y="${m.t}" width="${band}" height="${ih}"></rect>`;
+    const cut = clipped(c)
+      ? `<path class="bar-break" d="M${x - 2},${m.t + 14} l${bw / 4 + 1},-5 l${bw / 4 + 1},5 l${bw / 4 + 1},-5 l${bw / 4 + 1},5"></path>
+         <path class="bar-break" d="M${x - 2},${m.t + 20} l${bw / 4 + 1},-5 l${bw / 4 + 1},5 l${bw / 4 + 1},-5 l${bw / 4 + 1},5"></path>`
+      : "";
+    return `<g class="stack" data-i="${i}">${rects}${cut}</g><rect class="hit" data-i="${i}" x="${xOf(i)}" y="${m.t}" width="${band}" height="${ih}"></rect>`;
   }).join("");
 
   // 시기 미상 막대 바로 앞 라벨은 겹치므로 생략
@@ -88,8 +96,12 @@ function chart(d) {
   const xLabels = cols.map((c, i) => (((i % labelEvery === 0 && !crowded(i)) || c.undated)
     ? `<text x="${xOf(i) + band / 2}" y="${H - 12}" text-anchor="middle"${c.undated ? ' class="undated-label"' : ""}>${esc(c.label)}</text>` : "")).join("");
   const sep = hasUndated ? `<line class="undated-sep" x1="${xOf(cols.length - 1) - gap / 2}" x2="${xOf(cols.length - 1) - gap / 2}" y1="${m.t}" y2="${m.t + ih}"></line>` : "";
-  const peak = cols.reduce((a, c) => (sum(c) > sum(a) ? c : a));
+  const peak = (datedCols.length ? datedCols : cols).reduce((a, c) => (sum(c) > sum(a) ? c : a));
   const pi = cols.indexOf(peak);
+  const und = cols.find((c) => c.undated);
+  const undLabel = und
+    ? `<text class="val-label" x="${xOf(cols.length - 1) + band / 2}" y="${Math.max(m.t - 6, y(Math.min(sum(und), max)) - 6)}" text-anchor="middle">${compact(sum(und))}</text>`
+    : "";
 
   box.innerHTML = `
     <svg viewBox="0 0 ${W} ${H}" aria-label="출처별 누적 막대그래프">
@@ -97,7 +109,8 @@ function chart(d) {
       <g class="axis">${ticks.map((t) => `<text x="${m.l - 8}" y="${y(t) + 4}" text-anchor="end">${compact(t)}</text>`).join("")}${xLabels}</g>
       ${sep}${bars}
       <line class="baseline" x1="${m.l}" x2="${W - m.r}" y1="${m.t + ih}" y2="${m.t + ih}"></line>
-      <text class="val-label" x="${xOf(pi) + band / 2}" y="${y(sum(peak)) - 6}" text-anchor="middle">${compact(sum(peak))}</text>
+      ${peak.undated ? "" : `<text class="val-label" x="${xOf(pi) + band / 2}" y="${y(sum(peak)) - 6}" text-anchor="middle">${compact(sum(peak))}</text>`}
+      ${undLabel}
     </svg>`;
   box.setAttribute("aria-label", `출처별 자료 수, 가장 많은 구간 ${peak.label} ${fmt(sum(peak))}건`);
 
