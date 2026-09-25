@@ -10,7 +10,7 @@
 
 import json
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -28,6 +28,25 @@ def norm(text: str | None) -> str:
 
 def norm_author(a: str | None) -> str:
     return re.sub(r"\s|\(.*?\)|（.*?）|옮김|저|著|지음", "", a or "")
+
+
+def catalog_rows() -> list[str]:
+    import os
+    import sys
+
+    os.environ.setdefault("STORAGE_BACKEND", "memory")
+    sys.path.insert(0, str(DATA.parent))
+    from app.services import books_service, catalog_service
+
+    books_service._load.cache_clear()
+    catalog_service._static.cache_clear()
+    entries, dup = catalog_service._static()
+    kept = Counter(e["source"] for e in entries)
+    rows = []
+    for key, label, *_ in catalog_service.SOURCES:
+        if kept.get(key) or dup.get(key):
+            rows.append(f"| {label} | {kept.get(key, 0) + dup.get(key, 0):,} | {kept.get(key, 0):,} | {dup.get(key, 0):,} |")
+    return rows
 
 
 def main() -> None:
@@ -71,6 +90,16 @@ def main() -> None:
         f"| KCISA 내부 — 같은 책의 소장본 여러 권 | {copies:,}권 | 한 권으로 합치고 `copies`에 권수 기록 |",
         f"| KCISA 내부 — 같은 제목·작가, 발행처가 다른 판본 | {len(multi):,}종 | 서로 다른 판본이라 모두 유지 |",
         f"| 위키문헌 ↔ KCISA — 같은 작가·같은 제목 | {len(linked):,}건 | 도서 정보에 위키문헌 원문 링크(`wikisource_url`) 연결 |",
+        "",
+        "## 통합 통계·검색에서의 출처 간 중복 (`app/services/catalog_service.py`)",
+        "",
+        "같은 작가·같은 대표 제목이면 **본문이 있는 출처를 우선**해 한 번만 센다: "
+        "위키문헌 > 구텐베르크 > 공유마당 > 한국문학번역원 > 국립중앙도서관 > KCISA. "
+        "같은 출처 안에서는 합치지 않는다 (공유마당의 '무제'·'其二'처럼 제목이 같아도 다른 작품이 많다).",
+        "",
+        "| 출처 | 원자료 | 통계에 넣은 수 | 앞 순위 출처와 겹쳐 뺀 수 |",
+        "|---|---|---|---|",
+        *catalog_rows(),
         "",
     ]
     if linked:

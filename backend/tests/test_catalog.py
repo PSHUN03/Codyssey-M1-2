@@ -8,7 +8,7 @@ def _write(path, data):
 
 
 def _sources(tmp_path, monkeypatch):
-    """위키문헌 1편 + 공유마당 3건(1건은 위키문헌과 중복, 1건은 연번만 다른 중복) + KCISA 2건."""
+    """위키문헌 1편 + 공유마당 3건(1건은 위키문헌과 중복, 2건은 제목이 같은 서로 다른 한시) + KCISA 2건."""
     _write(tmp_path / "wikisource_works.json", {"records": [{"title": "가는 길", "author": "김소월"}], "library": []})
     _write(tmp_path / "gongu_works.json", {"works": [
         {"title": "가는 길", "author": "김소월", "genre": "시", "date": "1923-10-01", "basis": "공표 월", "url": "u1"},
@@ -33,13 +33,13 @@ def _clear():
     catalog_service.invalidate()
 
 
-def test_catalog_dedupes_across_and_within_sources(client, tmp_path, monkeypatch, records):
+def test_catalog_dedupes_across_sources(client, tmp_path, monkeypatch, records):
     _sources(tmp_path, monkeypatch)
     stats = client.get("/api/catalog/stats").json()
     by = {s["key"]: s for s in stats["sources"]}
-    assert by["gongu"]["total"] == 1 and by["gongu"]["duplicates_removed"] == 2  # 위키문헌 중복 1 + 연번 중복 1
+    assert by["gongu"]["total"] == 2 and by["gongu"]["duplicates_removed"] == 1  # 위키문헌과 겹친 1건만 뺀다
     assert by["kcisa"]["total"] == 2 and by["mine"]["total"] == 12
-    assert stats["total"] == 12 + 1 + 2 and stats["undated_by_source"] == {"gongu": 1}
+    assert stats["total"] == 12 + 2 + 2 and stats["undated_by_source"] == {"gongu": 2}
     periods = {p["period"]: p["by_source"] for p in stats["series"]}
     assert periods["2000년대"] == {"kcisa": 1} and periods["2010년대"] == {"kcisa": 1}
     assert periods["2020년대"] == {"mine": 12}
@@ -52,6 +52,6 @@ def test_catalog_search_and_tool(client, tmp_path, monkeypatch):
     res = client.get("/api/catalog", params={"source": "kcisa", "q": "희곡"}).json()
     assert res["total"] == 1 and res["items"][0]["year"] == 2008 and res["items"][0]["source_label"] == "KCISA 도서정보"
     found = tools.execute("search_books", {"keyword": "승사주면"})
-    assert found["total"] == 1 and found["items"][0]["source_label"] == "공유마당"
+    assert found["total"] == 2 and found["items"][0]["source_label"] == "공유마당"
     assert client.get("/api/catalog", params={"source": "wikisource"}).status_code == 422  # 위키문헌은 /api/data
     _clear()

@@ -81,13 +81,13 @@ def _static() -> tuple[tuple[dict, ...], dict]:
     out: list[dict] = []
     dup: Counter = Counter()
 
-    def add(source: str, rows: list[dict], within: bool = False) -> None:
-        """앞 순위 출처에 같은 작가·같은 대표 제목이 있으면 뺀다. 같은 출처 안의 중복은 수집 단계에서 이미
-        정리했으므로(KCISA 소장본 합치기 등) within=True 인 출처(공유마당의 '제목-1, 제목-2' 연번)만 여기서 합친다."""
+    def add(source: str, rows: list[dict]) -> None:
+        """앞 순위 출처에 같은 작가·같은 대표 제목이 있으면 뺀다. 같은 출처 안은 합치지 않는다
+        (KCISA 소장본은 수집 단계에서 합쳤고, 공유마당의 '무제'·'其二'처럼 제목이 같아도 다른 작품이 많다)."""
         local: set = set()
         for i, r in enumerate(rows):
             key = work_key(r.get("title"), r.get("author"))
-            if key[1] and (key in seen or (within and key in local)):
+            if key[1] and key in seen:
                 dup[source] += 1
                 continue
             local.add(key)
@@ -103,7 +103,7 @@ def _static() -> tuple[tuple[dict, ...], dict]:
         "title": w["title"], "author": w.get("author"), "genre": w["genre"], "year": _year(w.get("date")),
         "basis": w.get("basis"), "url": w["url"], "note": w.get("summary"), "origin": w.get("origin"),
         "provider": w.get("provider"),
-    } for w in _read("gongu_works.json").get("works", [])], within=True)
+    } for w in _read("gongu_works.json").get("works", [])])  # 같은 제목(무제·其二 연작)도 서로 다른 작품
     for source, name in (("lti", "lti_books.json"), ("nlk", "nlk_books.json")):
         add(source, [{
             "title": w["title"], "author": w.get("author"), "genre": w.get("genre", "기타"), "year": w.get("year"),

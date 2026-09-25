@@ -137,7 +137,7 @@ def fetch(codes: list[str] | None = None, shard: tuple[int, int] = (0, 1)) -> No
 # ---------------------------------------------------------------- 정리
 # 태그·요약 → 장르 (앞쪽 규칙 우선). 어느 것에도 안 걸리는 비문학(영화 평론 등)은 뺀다
 GENRE_RULES = [
-    (r"희곡|시나리오|각본", "희곡"), (r"동화|우화", "동화"), (r"동요|동시", "노래"),
+    (r"희곡|시나리오|각본", "희곡"), (r"동화|우화|아동문학", "동화"), (r"동요|동시", "노래"),
     (r"장편소설|장편 소설", "장편소설"), (r"중편소설", "중편소설"), (r"단편소설|단편 소설", "단편소설"),
     (r"소설|야담|설화|고전소설|신소설", "소설"), (r"시조", "시조"), (r"한시|오언|칠언|절구|율시", "한시"),
     (r"가사(?!\s*없)", "가사"), (r"향가|고려가요|속요|악장", "고전시가"), (r"민요|노래|창가|가곡", "노래"),
@@ -189,6 +189,8 @@ def build() -> None:
                 skipped["제목 없음"] += 1
                 continue
             genre = genre_of(w)
+            if genre == "기타" and re.search(r"취지서|趣旨書|考$|解$|辨$|지명|地名", w["title"]):
+                genre = None  # 고증·취지서 등 비문학
             if not genre:
                 skipped["비문학·장르 확인 불가"] += 1
                 continue
@@ -205,6 +207,10 @@ def build() -> None:
             # 원문 파일명 '김정식-가는_길-개벽.txt' → 출전 '개벽' (저자-제목-출전 형식일 때만)
             parts = next((f.rsplit(".", 1)[0].split("-") for f in w["files"]), [])
             origin = parts[-1].replace("_", " ") if len(parts) >= 3 and not parts[-1].isdigit() else ""
+            squash = lambda x: re.sub(r"[\s()（）一-鿿]", "", x)  # noqa: E731
+            if origin and (squash(origin) in squash(title) or squash(title) in squash(origin)
+                           or re.search(r"검수|\d", origin) or len(origin) > 12):
+                origin = ""  # 파일명 끝이 제목 반복·작업 표시(검수3)인 경우
             rows.append({
                 "title": title,
                 "author": w["author"] or None,
