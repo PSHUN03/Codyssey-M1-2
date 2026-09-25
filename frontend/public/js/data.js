@@ -241,7 +241,24 @@ function updateCount() {
   if (text) $("#data-form").value.value = noSpace;
 }
 
+// 참고 자료 출처를 통합 통계의 출처 목록(이름·건수)으로 채운다 → 새 출처가 늘어도 화면을 고치지 않아도 된다
+async function fillSourceOptions() {
+  try {
+    const stats = await api.catalogStats({});
+    const sel = $("#f-mine");
+    const anchor = [...sel.options].find((o) => o.value === "books");
+    [...sel.options].filter((o) => o.value.startsWith("ref:")).forEach((o) => o.remove());
+    stats.sources.filter((s) => !["wikisource", "mine", "library"].includes(s.key)).reverse().forEach((s) => {
+      const o = document.createElement("option");
+      o.value = `ref:${s.key}`;
+      o.textContent = `└ ${s.label} (${fmt(s.total)})`;
+      anchor.after(o);
+    });
+  } catch (_) { /* 목록을 못 받으면 '참고 자료 전체'만 둔다 */ }
+}
+
 export function initData(changeCallback) {
+  fillSourceOptions();
   onChange = changeCallback || onChange;
   $("#stage-select").innerHTML = `<option value="">선택 안 함</option>` + STAGES.map((s) => `<option value="${s}">${s}</option>`).join("");
   resetForm();

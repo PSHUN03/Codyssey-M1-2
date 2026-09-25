@@ -69,14 +69,18 @@ TOOLS = [
     _fn(
         "search_books",
         "참고 자료 목록을 제목·저자·발행처·요약으로 찾는다. 출처: 공유마당 만료저작물(근대 문학·한시, 원문 링크), "
-        "구텐베르크(한국 설화의 영어 번역), 한국문학번역원 번역서, 국립중앙도서관, KCISA 기관별 도서정보(시집·소설집·"
-        "희곡 대본·평론). 본문은 없고 목록 정보와 링크만 있다(구텐베르크 제외). 더 읽어 볼 작품·책을 추천할 때 사용한다.",
+        "구텐베르크(한국 설화의 영어 번역), 문화공공데이터광장 보충 자료(번역원 번역서, 국립중앙·세종·어린이청소년도서관 "
+        "사서추천, 청소년권장·대학신입생추천도서, 국립중앙도서관 소장 문학 등), KCISA 기관별 도서정보(시집·소설집·희곡 "
+        "대본·평론). 본문은 없고 목록 정보와 링크만 있다(구텐베르크 제외). 더 읽어 볼 작품·책을 추천할 때 사용한다.",
         {
             "keyword": {"type": "string", "description": "검색어 (예: 시집, 윤동주, 희곡)"},
             "genre": {"type": "string", "enum": list(GENRES)},
-            "source": {"type": "string", "enum": ["gongu", "gutenberg", "lti", "nlk", "kcisa"],
-                       "description": "출처를 좁힐 때만 (공유마당 gongu, 구텐베르크 gutenberg, 번역원 lti, "
-                                      "국립중앙도서관 nlk, KCISA kcisa)"},
+            "source": {"type": "string", "enum": ["gongu", "gutenberg", "lib046", "lib047", "nlkf0201", "nlsf0401",
+                                                  "nlcfsase", "kpef0102", "kpef0103", "kscd0820181", "nltot",
+                                                  "nlkf021801", "nfmbook", "kcisa"],
+                       "description": "출처를 좁힐 때만 (공유마당 gongu, 구텐베르크 gutenberg, 번역원 번역서 lib046·lib047, "
+                                      "사서추천 nlkf0201·nlsf0401·nlcfsase, 청소년권장 kpef0102, 대학신입생 kpef0103, "
+                                      "국립중앙도서관 소장 nltot, KCISA kcisa 등)"},
             "limit": {"type": "integer", "minimum": 1, "maximum": 8},
         },
         ["keyword"],

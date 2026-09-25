@@ -1,13 +1,11 @@
 from typing import Literal, Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 
 from ..schemas import CatalogListOut, CatalogStatsOut, Genre
 from ..services import catalog_service
 
 router = APIRouter(prefix="/api/catalog", tags=["catalog (모든 출처 통합 목록·통계)"])
-
-ReferenceSource = Literal["gutenberg", "gongu", "lti", "nlk", "kcisa"]
 
 
 @router.get("/stats", response_model=CatalogStatsOut, summary="통합 통계 (모든 출처, 중복 제외)")
@@ -23,10 +21,12 @@ def catalog_stats(
 @router.get("", response_model=CatalogListOut, summary="참고 자료 목록 (파일 출처 통합 검색)")
 def list_catalog(
     q: Optional[str] = Query(None, max_length=50, description="제목·저자·발행처·요약 검색어"),
-    source: Optional[ReferenceSource] = None,
+    source: Optional[str] = Query(None, max_length=20, description="출처 키 (통합 통계의 sources[].key, 위키문헌 제외)"),
     genre: Optional[Genre] = None,
     limit: int = Query(20, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ):
-    """구텐베르크·공유마당·한국문학번역원·국립중앙도서관·KCISA 자료 (위키문헌은 /api/data, /api/library)."""
+    """공유마당·구텐베르크·문화공공데이터광장 보충 자료·KCISA (위키문헌은 /api/data, /api/library)."""
+    if source and source not in catalog_service.REFERENCE_KEYS:
+        raise HTTPException(422, f"source 는 {', '.join(catalog_service.REFERENCE_KEYS)} 중 하나여야 합니다.")
     return catalog_service.list_entries(q=q, source=source, genre=genre, limit=limit, offset=offset)

@@ -58,7 +58,7 @@
         <div class="hero-copy">
           <span class="badge-positive">글쓰기 전용 AI 코치</span>
           <h1 class="display">주제부터<br />퇴고까지<br />같이 씁니다.</h1>
-          <p class="lead">시·수필·소설·동화·희곡, 장르는 상관없어요. 글벗은 당신의 글쓰기 기록과 위키문헌·공유마당 등에서 모은 문학 자료 3만 4천여 건을 읽고, 지금 쓰는 단계에 맞는 질문과 피드백을 건넵니다.</p>
+          <p class="lead">시·수필·소설·동화·희곡, 장르는 상관없어요. 글벗은 당신의 글쓰기 기록과 위키문헌·공유마당·공공데이터 등에서 모은 문학 자료 11만여 건을 읽고, 지금 쓰는 단계에 맞는 질문과 피드백을 건넵니다.</p>
           <ol class="steps" aria-label="글쓰기 단계">
             <li><b>01</b>주제 선정</li>
             <li><b>02</b>구상·개요</li>
@@ -168,12 +168,8 @@
                 <option value="true">내가 쓴 기록</option>
                 <option value="false">위키문헌 작품</option>
                 <option value="library">참고 작품 서재 (발표 시기 미상)</option>
-                <option value="books">참고 자료 전체 (공유마당·구텐베르크·KCISA 등)</option>
-                <option value="ref:gongu">└ 공유마당 만료저작물</option>
-                <option value="ref:gutenberg">└ 구텐베르크 (영어)</option>
-                <option value="ref:lti">└ 한국문학번역원 번역서</option>
-                <option value="ref:nlk">└ 국립중앙도서관</option>
-                <option value="ref:kcisa">└ KCISA 도서정보</option>
+                <option value="books">참고 자료 전체 (공유마당·구텐베르크·공공데이터 등)</option>
+                <!-- 출처별 항목은 js/data.js 가 통합 통계의 출처 목록으로 채운다 -->
               </select>
               <select id="f-genre" class="genre-select" data-empty="전체 장르" aria-label="장르"></select>
               <input id="f-q" type="search" maxlength="50" placeholder="제목 · 지은이 · 메모 검색" aria-label="검색" />
@@ -226,7 +222,7 @@
           <div class="card-head">
             <div>
               <h2 id="ov-title" class="display-xs">모든 자료 한눈에</h2>
-              <p id="ov-sub" class="caption">위키문헌·내 기록·공유마당·구텐베르크·KCISA 등 모든 출처를 중복 없이 합쳤어요.</p>
+              <p id="ov-sub" class="caption">위키문헌·내 기록·공유마당·구텐베르크·문화공공데이터광장(KCISA 외 11종) 등 모든 출처를 중복 없이 합쳤어요.</p>
             </div>
             <div class="seg" id="ov-group" role="radiogroup" aria-label="묶음 단위">
               <button role="radio" data-group="decade" aria-checked="true">연대별</button>

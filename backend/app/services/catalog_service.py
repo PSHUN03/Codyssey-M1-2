@@ -5,9 +5,10 @@
   2. 위키문헌 참고 작품 서재 (Firestore library) — 본문 있음, 발표 시기 미상
   3. 구텐베르크 한국 관련 문학 (data/gutenberg_works.json) — 영어 본문
   4. 공유마당 만료저작물 어문 (data/gongu_works.json) — 목록 정보 + 원문 링크
-  5. 한국문학번역원 번역 출간 도서 (data/lti_books.json) — 서지 정보
-  6. 국립중앙도서관 (data/nlk_books.json) — 서지 정보
-  7. KCISA 기관별 도서정보 (data/kcisa_books.json) — 서지 정보, 연도는 제목의 발행 연도 또는 기관 등록 연도
+  5~15. 문화공공데이터광장 보충 자료 11종 (data/extra_*.json, scripts/import_kcisa_extra.py) — 서지 정보
+        번역원 번역출간도서·전문도서관 소장, 국립중앙도서관·세종도서관·어린이청소년도서관 사서추천, 청소년권장·
+        대학신입생추천도서, 올림픽공원 도서, 국립중앙도서관 소장자료·OAK, 국립민속박물관 발간도서
+  16. KCISA 기관별 도서정보 (data/kcisa_books.json) — 서지 정보, 연도는 제목의 발행 연도 또는 기관 등록 연도
 
 파일 출처는 읽기 전용이라 Firestore 에 넣지 않고 서버 메모리에서 합친다 (무료 한도 보호).
 """
@@ -33,10 +34,22 @@ SOURCES = [
     ("library", "위키문헌 서재", True, "발표 시기 미상"),
     ("gutenberg", "구텐베르크", True, "초판 연도"),
     ("gongu", "공유마당", False, "공표 연월 · 창작 연도"),
-    ("lti", "한국문학번역원", False, "번역서 출간 연도"),
-    ("nlk", "국립중앙도서관", False, "발행 연도"),
+    # 문화공공데이터광장 보충 자료 (data/extra_<key>.json) — 우선순위 순
+    ("lib046", "번역원 번역출간도서", False, "연도 정보 없음 (원작 단위로 묶음)"),
+    ("lib047", "번역원 전문도서관 소장", False, "연도 정보 없음 (원작 단위로 묶음)"),
+    ("nlkf0201", "국립중앙도서관 사서추천", False, "연도 정보 없음"),
+    ("nlsf0401", "국립세종도서관 사서추천", False, "소개글의 발행 연도"),
+    ("nlcfsase", "국립어린이청소년도서관 사서추천", False, "연도 정보 없음"),
+    ("kpef0102", "청소년권장도서", False, "연도 정보 없음"),
+    ("kpef0103", "대학신입생추천도서", False, "연도 정보 없음"),
+    ("kscd0820181", "올림픽공원 도서정보", False, "서지의 발행 연도"),
+    ("nltot", "국립중앙도서관 소장자료", False, "연도 정보 없음 (KDC 800번대 문학)"),
+    ("nlkf021801", "국립중앙도서관 OAK", False, "연도 정보 없음"),
+    ("nfmbook", "국립민속박물관 발간도서", False, "발간 연도"),
     ("kcisa", "KCISA 도서정보", False, "제목의 발행 연도, 없으면 기관 등록 연도"),
 ]
+EXTRA_KEYS = [k for k, *_ in SOURCES[SOURCES.index(next(s for s in SOURCES if s[0] == "lib046")):-1]]
+REFERENCE_KEYS = [k for k, *_ in SOURCES if k not in ("wikisource", "mine", "library")]
 SOURCE_LABEL = {k: label for k, label, *_ in SOURCES}
 MIN_YEAR = 1400
 STATS_TTL = 120
@@ -104,12 +117,12 @@ def _static() -> tuple[tuple[dict, ...], dict]:
         "basis": w.get("basis"), "url": w["url"], "note": w.get("summary"), "origin": w.get("origin"),
         "provider": w.get("provider"),
     } for w in _read("gongu_works.json").get("works", [])])  # 같은 제목(무제·其二 연작)도 서로 다른 작품
-    for source, name in (("lti", "lti_books.json"), ("nlk", "nlk_books.json")):
+    for source in EXTRA_KEYS:
         add(source, [{
             "title": w["title"], "author": w.get("author"), "genre": w.get("genre", "기타"), "year": w.get("year"),
             "basis": w.get("basis"), "url": w.get("url"), "publisher": w.get("publisher"), "note": w.get("note"),
             "language": w.get("language"),
-        } for w in _read(name).get("works", [])])
+        } for w in _read(f"extra_{source}.json").get("works", []) if w.get("title")])
     add("kcisa", [{
         "title": b["title"], "author": b.get("author"), "genre": b["genre"], "year": b.get("year"),
         "basis": b.get("year_basis"), "url": b.get("url"), "publisher": b.get("publisher"),
@@ -119,7 +132,7 @@ def _static() -> tuple[tuple[dict, ...], dict]:
 
 
 def reference_entries() -> list[dict]:
-    """파일 출처(구텐베르크·공유마당·번역원·국립중앙도서관·KCISA) 중복 제거 목록."""
+    """파일 출처(구텐베르크·공유마당·보충 자료 11종·KCISA) 중복 제거 목록."""
     return list(_static()[0])
 
 
