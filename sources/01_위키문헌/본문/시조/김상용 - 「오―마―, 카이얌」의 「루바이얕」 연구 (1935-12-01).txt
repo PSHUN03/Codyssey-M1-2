@@ -1,0 +1,276 @@
+제목: 「오―마―, 카이얌」의 「루바이얕」 연구
+지은이: 김상용
+장르: 시조
+날짜: 1935-12-01 (창작 월)
+글자 수(공백 제외): 8,368
+메모: 《「오―마―, 카이얌」의 「루바이얕」 연구》 김상용 — 창작 월 기준 · 《詩苑》 1, 2, 3, 5호에 걸쳐 연재하였다. 오마르 하이얌의 시집 루바이야트(Rubaiyat)의 영역본
+원문: https://ko.wikisource.org/wiki/%EC%98%A4%EB%A7%88%EB%A5%B4_%ED%95%98%EC%9D%B4%EC%96%8C%EC%9D%98_%EB%A3%A8%EB%B0%94%EC%9D%B4%EC%95%BC%ED%8A%B8_%EC%97%B0%EA%B5%AC
+출처: 한국어 위키문헌 (퍼블릭 도메인)
+
+----------------------------------------
+「루바이얕」(Rubaiyat)은 波斯(파사)의 시편이다. 「루바이」(Rubai)는 영어의 (quartrain) 즉 四行詩(사행시)의 뜻으로 「얕」(yat)은 그 복수형이다. 十一세기의 파사(波斯)시인 「오―마, 카이얌」(Omar Khayyam)의 作(작)이다. 그는 4행의 단시를 지어 時時(시시)의 감흥과 정회를 읊었다. 이 詠吟(영음)이 모여 백십편 「루바이얕」으로 우리에게까지 전해진 것이다.
+
+波斯(파사)에서 이 시인이 敬慕(경모)의 的(적)이 되고 이 시인의 작이 찬탄의 原(원)이 되는 것은 물론이다. 그러나 명작도 한동안 담안의 꽃이었다. 그 꽃송이를 垣墻(원장) 밖에 나타내어 세인의 이목을 놀랜 것은 「에드워드, ᅋᅵ쓰쩨라―ㄹ드」(Edward Fitzgerald, 1809―1883)다.
+
+「ᅋᅵ쓰쩨라―ㄹ드」는 「테니슨」卿(경)의 학우다. 또한 그의 지기의 일인이었다. 말년까지 아는 이가 적었으되 才華(재화)가 비상하던 시인이다. 그는 有餘(유여)한 자산이 있었다. 그리하야 평생을 古書(고서)수집과 古文學(고문학) 연구로 낙을 삼았다. 그의 연구벽은 그로 하야금 波斯文學(파사문학)까지를 섭렵케 하였다. 섭렵하는 중 「루바이얕」에 접하였다. 「ᅋᅵ쓰쩨라―ㄹ드」는 문득 그 玄幽深奧(현유심오)한 詩想(시상)에 놀랬다. 문득 그 음악의 哀傷(애상)美妙(미묘)에 도취하였다. 그는 이 명작을 영어로 바꿔놀 생각을 하였다.
+
+어떤 나라 말의 文(문)이나 시를 다른 나라 말로 바꿔놀 때, 원어의 뜻의 아롱짐과 음의 아름다움을 충분히 이식하기란 극난한 것이다. 譯文(역문)이 심미적 가치에 있어 원문에 및지 못하는 것이 일반적 사실이다. 그런 의미에서 필자가 소개하려는 이 譯詩(역시)의 가치를 깎아 評定(평정)하려는 이가 있을지도 모른다. 그러나 「ᅋᅵ쓰쩨라―ㄹ드」는 번역에 있어 고금을 독보한 대가다. 그의 譯(역)은 모두가 稀有(희유)의 名譯(명역)이다. 「루바이얕」은 그 명역 중의 명역인 것이다. 루바이얕의 英譯(영역)은 근자에 격증하는 唐荒(당황)한 번역물과는 比(비)가 아니되는 번역계의 주옥이다.
+
+그는 번역가인 동시에 시인이었다. 그가 품은 詩才(시재)를 기우려 「루바이얕」을 번역할 때, 그는 一字(일자)나 一句(일구)에 구애되는 졸렬을 취치 않었다. 그는 오직 시 전체의 진수가 되는 진의와 음악을 전하기에 진력하였다. 즉 原詩(원시)의 뜻의 陰影(음영)과 음향의 진경을 가다듬어 원시에 못지 않는 음악적 영어로 새 비단을 짰던 것이다. 그는 번역을 하는 듯 문득 창작을 한 것이다. 창작을 하되 원의를 잠시 다른 곳에서 빈 셈이다. 이런 의미에서 루바이얕의 英譯(영역)은 가장 자유로운 역이오 동시에 가장 완전한 역이다.
+
+하여간 우리는 이 아름다운 譯詩(역시)를 통하야 당시 波斯(파사)사회의 專制(전제)와 억압을 彼岸(피안)의 火(화)로 번려두고 오직 落花(낙화)와 流水(유수)와 浮雲(부운)을 보고 숙명의 無可奈何(무가내하)와 인생의 무상, 세사의 허황을 읊조린 대시인의 노래를 듣는다. 그는 영혼의 영원을 말한다. 영원한 영혼이 영겁에서 영겁으로 영원히 浮游(부유)하는 것을 말한다. 일생은 영원한 逆旅上(역려상)의 一夜(일야)의 逗留(두류)다. 머무는 동안이 곧 娑婆(사바)인 것이다. 우리는 오늘 이곳에 머문다. 그러나 내일 저곳으로 가버릴 나그내다. 잠시 들르매, 생이 있다. 들렀다 떠나매 死(사)가 있는 것이다. 영혼은 멸치 않고 세월은 窮盡(궁진)함이 없는 것이다. 불멸하는 영혼이 무궁한 세월을 들고나매 등불이 깜박이듯 생사가 명멸하는 것이다. 이미 이러한 숙명이 우리에게 맡겨졌다. 숙명의 定(정)헌대로 올때 왔다가 갈때 갈 뿐이다.
+
+만사는 다 定(정)이 있다. 이것을 모르는 것이 인간의 우매다. 악착한다. 營逐(영축)한다. 또한 空勞(공로)가 아니냐? 그는 장미를 보라 한다. 뜰에 가득 핀 장미를 보라 한다. 그 송이들이 얼마나 아름다운가. 그러나 爭艶(쟁염)하는 저 花叢(화총)밑에 수없는 낙화를 보라. 지금의 낙화로되 어제 웃던 꽃인 것이다. 어제 웃던 송이가 오늘의 낙화가 된 것이다. 오늘 웃는 송이가 내일 저 모양이 아니 될 것을 뉘 과연 장담할 것이뇨. 꽃은 피었다 진다. 사람은 났다 죽는 것이다. 그 덧없음이 장미와 같다는 것이다.
+
+그는 바람을 보라 한다. 어디선지 모르게 문득 불어오는 것이 바람이다. 바람은 또 문듯 어디론지 모르게 가바리지 안는가. 인생도 온 곳 모르게 온 것이다. 간 곳 모르게 가버릴 것이다. 그 虛誕(허탄)함이 바람과 같지 아니하뇨.
+
+그는 또 시냇물을 보라 한다. 어째 흐르는지 모르고 그저 흘러만 가는 시냇물을 보라 한다. 인생이 웨 왔는지를 뉘 아느뇨. 인생이 웨 가는지를 뉘 또한 헤아리내뇨. 都是(도시) 뜻이 없고 알 길이 없는 것이다. 뜻 없고 알 길 없음이 흐르는 시냇물과 같다는 것이다.
+
+그는 이러한 서거푼 노래를 부르다 간 시인이다. 우리는 지금 그의 시를 읽고 그의 정회를 엿보려는 것이다. 이 情調(정조)가 몹시 우리 조상들이 읊은 시의 정조와 같다. 읽어보면 혹 우리 가요의 轉譯(전역)이 아닌가 의심할 정도로 정조의 부합되는 것이 있다. 인생의 무상을 탄식하는 데 있어 족속의 別(별)이 없을 것이다. 그러나 가장 이 탄식이 심절한 것은 동양족속이 아닌가 한다.
+
+이 시에 포함된 철학에 대하야 사람에 따라 평가를 달리할 것이다. 혹 이런 시의 불필요를 말하는 이도 있을게다. 혹 이런 시의 소개를 해독시하는 인사도 있을지 모른다. 그러나 원작자가 인생의 전면은 몰라도, 적어도 어느 일면의 진리는 確執(확집)했던 것이 사실이다. 그는 그 진리를 가장 美妙(미묘)하게 표현하였다. 의견은 자유요 절대다. 이 시의 불필요 혹은 이 시의 소개의 해독시를 고집하는 이가 있다면 그 고집은 그의 頑强(완강)에 맡겨둘 것이다. 필자는 그 문장의 수려, 措辭(조사)의 섬세만으로도 일독의 가치가 충분한 이 작품을 동호자와 함께 연구해 보려는 것 뿐이다.
+
+이는 去年(거년) 朝鮮中央日報(조선중앙일보)를 통하야 일시 발표하던 변변치 못한 연구다. 그래 未畢(미필)한 것을 섭섭히 여기던 바 이번의 기회를 이용하야 전편을 소개하고저 하는 배다.
+
+(《詩苑》 1호, 1935년 2월)
+
+I
+Awake! for Morning in the Bowl of Night
+Has flung the Stone that puts the Stars to Flight:
+And Lo! the Hunter the East has caught
+The Sultan's Turret in a Noose of Light.
+
+[註解(주해)]
+
+The Bowl of Night, 「밤하늘」의 지칭이다. 둥근 하늘을 Bowl(사발)에 비한 것이다.
+
+Has flung the Stone, 돌을 던젔다. Fitzgerald 註(주)에 〔Flinging a Stone into the Cup was the signal for “to Horse” in the desert〕(사막지방에서 잔 안에 돌을 던저 넣는 것은 「말을 타라」는 암호라 하였다) 이곳에서는 「아츰」이 「밤하늘」에 돌을 던저 뭇별들을 쫓은 것으로 볼 것이다.
+
+the Hunter of the East, 동방의 사냥군, 즉 태양이다.
+
+Sultan, 回回敎國王(회회교국왕).
+
+Noose, 「옥노」(輪索(윤색))다. 태양을 「사냥군」에 비하였기에 그 빝을 「옥노」에 비긴 것이다.
+
+[意譯(의역)]
+잠을 깨오, 아츰은 밤하늘에
+돌던저 별들을 쫓아 버렸소,
+東天(동천)에, 저보오, 아츰해 솟아,
+쌀턴城(성) 첨탑을 비최여주오.
+
+光陰(광음)이 百代(백대)의 過客(과객)임은 李白(이백)의 탄만이 아니다. 浮生(부생)이 若夢(약몽)키로 「카이얌」도 사람의 일생을 하로 여정에 비하였다. 청춘이 몇 날이뇨, 건듯 갈 것이오. 일생이 또한 눈결에 끝날 것이다. 가면 또는 못 오는 그 길이 아닌가. 과거는 이미 간 날이다. 미래가 꼭 내게 오리라 뉘 期必(기필)할고. 拘碍逡巡(구애준순)치 말고 있는 이 날을 즐기자는 뜻이 그 속에 잠겨 있다.
+
+[時調譯(시조역)]
+밤빛이 것치도다. 별마저 사라지고
+쌀턴城(성) 뾰족塔(탑)에 아츰별이 찬란코야
+눈결에 가는 하로를 일어 마지하여라.
+
+중국 郭沫若(곽말약)의 漢譯(한역)을 참고삼아 전재한다.
+醒呀! 太陽驅散了群聲, (성하! 태양구산료군성)
+暗夜從空中逃遁, (암야종공중도둔)
+燦爛的金箭, (찬란적금전)
+射中了穌丹的高瓴. (사중료소단적고령)
+
+II
+Dreaming when Dawn's Left Hand was in the Sky.
+I heard a Voice within the Tavern cry,
+“Awake, my little ones, and fill the Cup
+Before Life's Liquor in its Cup be dry.”
+
+[註解(주해)]
+
+Dawn's Left Hand, 第四版(제사판)에는 “False morning” 이라 한 것을 보면, 먼동이 트랴 할 때, 지평선 우에 흐엿이 보이는 빛을 말하는 것이라 생각된다. left hand는 「left handed(신실치 못한)」로 보아, 「참되지 못한」, 혹 「거짓」의 뜻으로 볼 것이다. 날이 밝으랴 할 때, 흐엿이 보이는 그 빛은 밝기 한 시간전 쯤 나타났다가, 밝자 없어진다 한다.
+
+Tavern, “Public for of food and drink”로 조선의 주막과 相似(상사)하다. 물론 현세를 주막에 比(비)해 한 말이다.
+
+A Voice,「Cup bearer(잔 날으는 사람)」 즉 「Sa'ki波斯(파사)어」의 의역이다.
+
+little ones, 「세상 사람들아!」(Children of the world)의 뜻이다.
+
+, 인생을 「잔」에 비하는 예는 영문학에 흔히 있다. Life's (생명액)이 그 속에 남어 있는 동안 우리의 목숨은 존속할 것이다.
+
+[意譯(의역)]
+먼동이 흐엿할 때 꿈속 들었소,
+주막에서 부르는 소리 들었소.
+친구여 어서 일어 눈결에 말을
+생의 잔 말으기 전 부대 마시소.
+
+[時調譯(시조역)]
+曉頭客舘(효두객관)에 손을 일라 외치누나,
+생의 잔 담긴 술이 얼매해 말을 것가.
+蜉蝣(부유)에 비할 일생을 노다 간다.
+
+곽말약의 譯(역)은 第四版(제사판)인
+Before the phantom of False morning died,
+Methought a voice within the Tavern cried,
+“When all the Temple is prepared within,
+Why nods the drowsy Worshipper outside?”
+에 의한 것이다.
+
+朝昧的幻影破猶未曾 (조매적환영파유미증)
+茅店內好像有人呼聲 (모점내호상유인호성),
+「寺院都己掃淨了內堂 (사원도기소정료내당),
+托鉢人爲甚還在門外打盹?」 (탁발인위심환재문외타순)
+
+(《詩苑》 2호, 1935년 4월)
+
+III
+And, as the Cock crew, those who stood before
+The Tavern shouted ─ “Open then the Door !
+You know how little while we have to stay,
+And, once departed, may return no more.”
+
+[註解(주해)]
+
+As the Cock crew의 as는 when의 뜻으로 볼 것이다. You know (that) how little while we have to stay.
+
+once (we are) departed.
+
+(we) may return no more.
+
+[意譯(의역)]
+닭 울자 주막 앞 모혀든 무리,
+문 열라 외치는 소리 들었오.
+蜉虫遊(부충유)에나 比(비)할가 짧은 동안을,
+한번 가 다시는 못 오는 길을.
+
+[時調譯(시조역)]
+酒幕(주막)에 닭이 우니 門(문)열라 외치나다,
+暫時(잠시) 들른 몸의 行旅(행려)가 바쁘도다,
+한번 가 못올 길이니 더욱 섫어하노라,
+………………………
+
+郭沫若(곽말약)은 譯(역)하야
+時候在鷄鳴 (시후재계명)
+人們在第店之前呌應─ (인문재제점지전규응)
+「開門罷! 我們只得覊留片時, (개문파! 아문지득기유편시)
+一朝去後, 怕是不再回程」 (일조거후, 파시부재회정)이라 하얐고,
+
+Heron─Allen은 “Gems of Chinese Literature (Giles 역)” 중에서 陶淵明(도연명)의 「歸去來辭(귀거래사)」를 인용하야 이 詩想(시상)에 비하얏다. 그 영역과 원문을 比讀(비독)하는 것도 一趣(일취)가 될 것이다.
+
+“My husbandmen will tell me when spring-time is nigh... thither I will repair through the deep gorge─ over the dizzy criff, trees bursting merrily into leaf, the streamlet swelling from its tiny source. Glad is this renewal of life in due reason: but, for me, I rejoice that my journey is over. Ah! how short a time it is that we are here! why then not set our hearts at rest, ceasing to trouble whether we remain or go. What boots it to wear out the soul with anxious thoughts? I want not wealth, I want not power; heaven is beyond my hopes, then let me stroll through the bright hours as they pass, in my garden, among my flowers: or I will mount the hill and sing my song, or weave my verse beside the liquid brook. Thus will I out my alloted span, content with appointments of Fate, my spirit from care.”
+
+「農人告余以春及(농인고여이춘급)─ (中略(중략)) 旣窈窕以尋壑(기요조이심학), 亦崎嶇而經丘(역기구이경구). 木欣欣以向榮(목흔흔이향영), 泉涓涓而始流(천연연이시류), 善萬物之得時(선만물지득시), 感吾生之行休(감오생지행휴), 己矣乎寓形宇內復幾時(기의호우형우내복기시), 曷不委心任去留(갈부위심임거류), 胡爲乎遑遑欲何之(호위호황황욕하지). 富貴非吾願(부귀비오원), 帝鄕不可期懷良辰以孤住(제향부가기회량신이고주), 或植杖而耘耔(혹식장이운자), 登東皐以舒嘯(등동고이서소), 臨淸流而賦詩(임청류이부시), 聊乘化以歸盡(료승화이귀진), 樂夫天命後奚疑(낙부천명후해의)」
+
+이러한 감정은 우리의 속요에도 다분 노출된 것이다. 「二八靑春歌(이팔청춘가)」의 「세월이 가기는 흐르는 물 같고 인생이 늙기는 바람결 같고나」, 「愁心歌(수심가)」의 「인생 한번 죽어지면 萬樹長林(만수장림)의 雲霧(운무)로고나」. 「六字(육자)백이」의 「사람이 살면 몇 백년이나 사드란 말이냐…」등은 이런 정한의 발로라 볼 것이다.
+
+Now the New Year reviving old desires,
+The thoughtful Soul to Solitude retires,
+Where the White Hand of Moses on the bough
+Puts on, and Jesus from the Ground suspires.
+
+[註解(주해)]
+
+New Year; 波斯(파사)의 신정은 춘분 즉 3월 21일이다. 그리고 波斯(파사)는 환절기가 짧아 눈 채 녹기 전에 꽃이 핀다 한다.
+
+The thoughtful Soul to Solitude retires ＝ The thoughtful Soul retires to Solitude.
+
+White Hand of Moses, 출애급기(Exodus) 제4장 6절에 “And the Lord said furthermore anto him, Put now thine hand into thy bosom. And he put his hand into his bosom: And when he took it out, behold, his hand was leprous as snow”
+
+(또 닐아사대 네 손을 품에 넣으라 품에 넣었다가 내여보니 문둥병이 들어 희기 눈같은지라)라 하얐다. 즉 급작이 나무ㅅ가지에 흰꽃들이 핀 것을 말하는 것이다.
+
+…suspires. 耶穌(야소)의 호흡은 병든 자를 낫게 하고 죽은 자를 살게 하는 힘이 있다 한다. 봄은 만물을 생동케하는 힘을 말한 것이다.
+
+[意譯(의역)]
+해 바뀌어 녯희망이 새롭습네다.
+침울한 묵은 마음 살아집네다.
+가지마다 구름이냥 꽃피는 시절,
+천지에 산기운이 넘치옵네다.
+
+[時調譯(시조역)]
+新陽(신양)이 반가워라, 녯보람이 새롭고야,
+지튼 생각이야, 자최인들 있으리오,
+白雲(백운)가 꽃이로고나, 이렁봄이 깊고녀.
+…………………‥
+
+郭沫若(곽말약)의 漢譯(한역)은 이러하다.
+新春甦活着舊時的希望 (신춘소활착구시적희망)
+使沈思的靈魂告了退藏 (사침사적령혼고료퇴장)
+退到那樹上露出(摩西的白手) (퇴도나수상노출(마서적백수))
+耶穌從地底嘆息的地方 (야소종지저탄식적지방).
+
+(《詩苑》 3호, 1935년 4월)
+
+Ⅴ
+Each morn a thousand Roses brings, you say;
+Yes, where leaves the Rose of Yesterday?
+And this first summer month that brings the Rose
+Shall take Jamshyd and Kaikobad away.
+
+[字解(자해)]
+
+Each morn a thousand Roses brings ＝ Each Morning brings a thousand roses, 「아츰마다 천 송이나 되는 장미가 핀다」
+
+But where leaves the Rose of Yesterday? ＝ But where does each morning leave the roses that were beautiful yesterday! 「그러나 어제 아츰 붉엇든 장미는 지금 어데 있나뇨?」
+
+Jamshyd; (Jam or Jem ＝ King, shid ＝ sun) A mystical King of the Peshadian dynasty 「페솨듸안 왕조의 신화적 군주」로 治世(치세) 칠백년에 亘(긍)하였다 한다.
+
+Kaikobad: the founder of the great Kayanian dynasty, who ruled over almost the whole of Asia Mino and died in 1234. 「대 왕조의 창업주로 거의 소아세아 전국을 통치하였다. 1234년에 薨(훙)하였다.」
+
+[意譯(의역)]
+아츰마다 천 송이 장미가 피나
+어제 붉든 송이는 어드메이뇨?
+꽃피는 첫여름이 지나가는 날
+「쟘쉳」, 그네도 가리.
+
+[時調譯(시조역)]
+千白(천백)가 萬紅(만홍)인가 새로 웃는 이 아츰에
+어제 있든 薔薇花(장미화)야 자최인들 아오리오
+英雄(영웅)도 꽃같이 스니 그를 서러하노라.
+
+A Book of Verse underneath the Bough,
+A Jug of Wine, a Loaf of Bread─ and Thou
+Beside me singing in the Wilderness─
+Oh, Wilderness were Paradise enow!
+
+[字解(자해)]
+
+were: would be.
+
+enow: enough
+
+[意譯(의역)]
+簞食(단사)가 옆에 있고, 壺酒(호주)도 있고,
+詩書(시서) 벗을 삼아, 그늘에 있네,
+그대 또 노래하니, 草野(초야)일망정
+궁궐의 호화를 웃으랴노라.
+
+[時調譯(시조역)]
+簞食(단사) 족타커늘, 壺酒(호주)마자 곁드리다.
+詩書(시서)를 즐길적에, 네 노래 부르나니
+一株樹(일주수), 草野(초야)일망정 草野(초야)ㄹ줄이 이시랴.
+
+Come, fill the Cup and in the fire of 
+Spring Your Winter-garment of Repentance fling;
+The Bird of Time has but a little way
+To flutter―and the Bird is on the Wing.
+
+[字解(자해)]
+
+Come, 반다시 「오라」의 뜻으로 보지 말고 「지 ―」와 비슷한 약한 의미로 보는 것이 조흘 것 같다.
+
+Fill the Cup, (인생의) 잔을 채우자, enjoy your life의 뜻이다.
+
+And in the fire ………… of Repentance fling ＝ and fling your Winter―garment of Repentance in the fire of Spring, 「후회」의 冬衣(동의)를 봄불(청춘의 정열)속에 터저 살우자.
+
+The Bird of Time, 「세월」이다. 세월을 나는 새에게 비한 것이 아름답다.
+
+But a little Way to flutter, “but”은 “only”의 뜻이다. to flutter는 Way를 형용하는 Adjective infinitioree다.
+
+「나래칠 거리가 짧고 짧다」
+
+is on the Wing ＝ is flying
+
+[意譯(의역)]
+잔 부어, 후회의 겨울옷일랑
+타오르는 봄불에, 살아 바리세.
+「때의 새」 나래치네, 짧은 인생은
+石火(석화)같이 있다가 없어질 것을.
+
+[時調譯(시조역)]
+후회의 낡은 옷은, 봄불에 살우리라,
+잔 가득 흥을 부어, 즐기다 가오리라,
+근심해 流水光陰(유수광음)을
+맨이 뉘라 있든고
+
+(《詩苑》 5호, 1935년 12월)

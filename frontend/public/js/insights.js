@@ -8,7 +8,7 @@ const GROUP_LABEL = { decade: "연대별", year: "연도별", month: "월별" };
 const state = { metric: "count", series: [], group: "decade" };
 
 function params() {
-  return { mine: $("#i-mine").value, genre: $("#i-genre").value };
+  return { genre: $("#i-genre").value };
 }
 
 function niceMax(v) {
@@ -126,7 +126,7 @@ export async function loadInsights() {
 
 export function initInsights() {
   initOverview(() => $("#i-genre").value);
-  ["#i-mine", "#i-genre", "#i-group"].forEach((s) => $(s).addEventListener("change", loadInsights));
+  ["#i-genre", "#i-group"].forEach((s) => $(s).addEventListener("change", loadInsights));
   $(".chart-card .seg").addEventListener("click", (e) => {
     const b = e.target.closest("button[data-metric]");
     if (!b) return;

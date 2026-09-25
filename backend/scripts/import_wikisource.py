@@ -121,6 +121,7 @@ KNOWN_DEATHS = {"박화성": 1988, "최정희": 1990, "이은상": 1982, "주요
                 "박세영": 1989, "김광균": 1993}
 POSTHUMOUS_LIMIT = 10  # 사망 후 이 햇수를 넘겨 나온 문집의 연도는 쓰지 않는다
 MIN_CHARS = 20
+TEXTS: dict[int, str] = {}  # 문서 번호 → 전체 본문 (sources/ 폴더용, data/.wikisource_texts.json)
 MAX_EXCERPT = 300
 
 _last_call = 0.0
@@ -568,6 +569,7 @@ def to_record(title: str, page: dict, genre: str, date: tuple[str, str] | None, 
     chars = len(re.sub(r"\s", "", body))
     if chars < MIN_CHARS:
         return None
+    TEXTS[page["pageid"]] = body
     latin = len(re.findall(r"[A-Za-z]", body))
     if latin > chars * 0.5:
         return None  # 한국어 본문이 아닌 외국어 원문·목차(예: 모비딕 영문 장 목록)
@@ -822,6 +824,14 @@ def main() -> None:
                         note=f"장·연재분 {len(bodies)}개 합산")
         if rec:
             rec["value"] = chars
+            # 전체 본문 = 장별 본문을 목차에 적힌 순서(없으면 장 번호 숫자 순)로 이어 붙인 것
+            pos = {name.split("/")[-1].strip(): i for i, name in enumerate(order)}
+
+            def natural(t: str) -> list:
+                return [int(x) if x.isdigit() else x for x in re.split(r"(\d+)", t)]
+
+            ordered = sorted(bodies, key=lambda x: (pos.get(x[0].split("/")[-1], 10 ** 6), natural(x[0])))
+            TEXTS[rec["pageid"]] = "\n\n".join(f"【{t.split('/')[-1]}】\n{b.strip()}" for t, _, b in ordered)
             keep(rec, date)
 
     # 저작권이 남은 작품(공동 작가 중 한 명이라도 1963년 이후 사망)은 뺀다 — 위키문헌의 라이선스 틀보다 우선
@@ -860,6 +870,9 @@ def main() -> None:
             shelf[key] = r
     library = sorted(shelf.values(), key=lambda r: (r["author"], r["title"]))
     save_caches()
+    kept_ids = {r["pageid"] for r in records + library}
+    (DATA_DIR / ".wikisource_texts.json").write_text(
+        json.dumps({str(k): v for k, v in TEXTS.items() if k in kept_ids}, ensure_ascii=False), encoding="utf-8")
     (DATA_DIR / ".wikisource_skipped.json").write_text(json.dumps(skipped_titles, ensure_ascii=False, indent=1),
                                                      encoding="utf-8")
 

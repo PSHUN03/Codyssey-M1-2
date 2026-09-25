@@ -1,0 +1,34 @@
+제목: 나뭇잎 배
+지은이: 정순철
+장르: 시
+날짜: 1929-01-01 (수록 문집 간행 연도)
+글자 수(공백 제외): 443
+메모: 《나뭇잎 배》 정순철 — 수록 문집 간행 연도 기준 · 《갈잎 피리》 수록
+원문: https://ko.wikisource.org/wiki/%EA%B0%88%EC%9E%8E_%ED%94%BC%EB%A6%AC/%EB%82%98%EB%AD%87%EC%9E%8E_%EB%B0%B0
+출처: 한국어 위키문헌 (퍼블릭 도메인)
+
+----------------------------------------
+\relative c {
+\key e \major \time 6/8 \autoBeamOn
+ b4. gis4 fis8 | b,8 e fis gis4. | gis4 b8 cis4 b8 | gis4. (gis4) r8 \break
+ b4 gis8 fis4 e8 | gis fis e cis4. | e4 e8 cis4 e8 | b4. (b4) r8 \break
+ cis4. e4 fis8 | gis4 b8 b4. | cis4 b8 e8 cis8 b8 | gis4. (gis4) r8 \break
+ cis4. b4 gis8 | cis8 b gis fis4. | gis8 b gis8 fis4 gis8 | e4. (e4) r8 \bar "|." }
+ \addlyrics {
+ 어 적 게 ᄯᅴ - 여 논 나 무 닙 배 는-
+ 구 즌 비 가 오 - 는 데 어 대 갓 슬 가
+ 못 가 에 비 저 즌 숩 풀 사 - 에 는
+ 죠 희 ᄶᅩᆨ 흰 - 돗 만 혼 - 자 남 엇 네}
+
+나무닙 배
+方定煥 作
+
+어적게 ᄯᅴ여논 나무닙배는
+구즌비가오는데 어대갓슬가
+못가의 비저즌 숩풀새에는
+죠희ᄶᅩᆨ 흰돗만 혼자남엇네.
+
+어적게 버레손님 태워건늬든
+새ㅅ파란 나무닙 적은나루ㅅ배
+돗대와 배ㅅ몸은 어대로가고
+련못에는 비방울 소래ᄲᅮᆫ일세.

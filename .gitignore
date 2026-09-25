@@ -22,3 +22,4 @@ backend/data/.kcisa_raw/
 backend/data/.gongu_cache/
 backend/data/.wikisource_skipped.json
 backend/data/.kcisa_extra/
+backend/data/.wikisource_texts.json

@@ -54,8 +54,9 @@
 | **합계 (중복 제외)** | **115,346건** | | 시기 확인 27,546 · 시기 미상 87,800 | |
 
 - **통계에 넣는 방식**: 날짜와 글자 수가 모두 있는 위키문헌 시계열 + 내 기록은 기존처럼 **글자 수 요약·추세**(AI 프롬프트에 주입)에 쓰고, 모든 출처는 **작품 수 기준 통합 통계**에 함께 넣는다. 발표 시기를 모르는 자료는 추측하지 않고 '시기 미상' 막대로 따로 센다.
-- **중복**: 같은 작가·같은 대표 제목이면 본문이 있는 출처를 우선해 한 번만 센다 (위키문헌 > 구텐베르크 > 공유마당 > 번역원 > 국립중앙도서관 > KCISA).
-- **검토했지만 넣지 않은 곳**: 국립중앙도서관 OAK-PORTAL(국가 학술 리포지터리, 논문 361만 건이라 문학이 거의 없고 100건 요청에 1분 가까이 걸림), 국립중앙도서관·한국문학번역원 자체 Open API(자동 승인이 아니거나 기관 신청 방식이라 보류), 문장웹진·글틴·시마을·리디북스(현재 작가·청소년의 저작권 있는 글이고 이용 허락·API가 없음, 시마을은 robots.txt로 크롤링 봇 차단, 리디북스는 봇 차단), 한국고전종합DB(무단 크롤링 금지 명시), 공유마당 국립중앙도서관 제공분(호적·교지 등 고문서 스캔본 위주), 구텐베르크 세계 문학 전체(한국어 글쓰기 도우미 성격상 한국 관련 작품만).
+- **중복**: 같은 작가·같은 대표 제목이면 본문이 있는 출처를 우선해 한 번만 센다 (위키문헌 > 구텐베르크 > 공유마당 > 공공데이터 보충 자료(위 표 순서) > KCISA 도서정보).
+- **자료 원본 보기**: 출처별 폴더 [`sources/`](sources/) — 위키문헌·구텐베르크 작품은 전체 본문 텍스트, 나머지 출처는 목록 CSV(링크 포함)와 설명
+- **검토했지만 넣지 않은 곳**: 국립중앙도서관 OAK-PORTAL(국가 학술 리포지터리, 논문 361만 건이라 문학이 거의 없고 100건 요청에 1분 가까이 걸림), 국립중앙도서관·한국문학번역원 자체 Open API(관리자 승인·기관 신청 방식이라 같은 자료를 제공하는 문화공공데이터광장 API로 대체), 문장웹진·글틴·시마을·리디북스(현재 작가·청소년의 저작권 있는 글이고 이용 허락·API가 없음, 시마을은 robots.txt로 크롤링 봇 차단, 리디북스는 봇 차단), 한국고전종합DB(무단 크롤링 금지 명시), 공유마당 국립중앙도서관 제공분(호적·교지 등 고문서 스캔본 위주), 구텐베르크 세계 문학 전체(한국어 글쓰기 도우미 성격상 한국 관련 작품만).
 
 데이터는 아래 출처들로 이루어져 있습니다.
 
@@ -142,9 +143,9 @@
 | 영역 | 사용 기술 |
 |---|---|
 | 백엔드 | Python 3.12, FastAPI, Pydantic v2, Uvicorn |
-| DB | Firebase Firestore (`firebase-admin`) — 컬렉션 `data`, `conversations`, `library` (+ 읽기 전용 참고 도서 JSON) |
+| DB | Firebase Firestore (`firebase-admin`) — 컬렉션 `data`, `conversations`, `library` (+ 읽기 전용 참고 자료 JSON) |
 | AI | OpenAI Chat Completions API + Function Calling — 모델 `gpt-5.4-mini` (Codyssey OpenAI 호환 게이트웨이 `OPENAI_BASE_URL` 경유, 개인 OpenAI 키면 주소만 비우면 됨) |
-| 테스트 | pytest 18개 (메모리 저장소 + 가짜 GPT 클라이언트) |
+| 테스트 | pytest 21개 (메모리 저장소 + 가짜 GPT 클라이언트) |
 | 프론트엔드 | HTML / CSS / JavaScript (프레임워크·차트 라이브러리 없이 SVG 직접 렌더링) |
 | 배포 | Render (백엔드), Vercel (프론트엔드) |
 | 보너스 | MCP 서버 (`mcp` Python SDK v2 — 원격 Streamable HTTP `/mcp` + 로컬 stdio) |
@@ -172,18 +173,20 @@ writing-assistant/
 │  │  ├─ import_kcisa.py       # KCISA 기관별 도서정보 전체 다운로드 → kcisa_build.py 로 문학 자료 선별
 │  │  ├─ import_gongu.py       # 공유마당 만료저작물 어문 목록 수집
 │  │  ├─ import_gutenberg.py   # 구텐베르크 한국 관련 문학
-│  │  ├─ import_bib_apis.py    # 한국문학번역원·국립중앙도서관 서지 API (키 필요)
+│  │  ├─ import_kcisa_extra.py # 문화공공데이터광장 보충 자료 11종 (번역원·사서추천·국립중앙도서관 소장 등)
+│  │  ├─ export_sources.py     # 출처별 자료 폴더 sources/ 생성 (본문 txt · 목록 CSV)
 │  │  ├─ review_duplicates.py  # 출처 간·출처 내 중복 검토 → docs/duplicates-report.md
 │  │  ├─ seed_firestore.py     # JSON → Firestore 적재
 │  │  ├─ analyze_data.py       # 분석 리포트 → docs/data-analysis.md
 │  │  ├─ verify_works.py       # 전 작품 실존 재검증 → docs/data-verification.md
 │  │  └─ mcp_smoke_test.py     # MCP 클라이언트로 원격/stdio 도구 호출 검증
 │  ├─ tests/                   # pytest
-│  └─ data/ (wikisource_works.json, gongu_works.json, gutenberg_works.json, kcisa_books.json)
+│  └─ data/ (wikisource_works.json, gongu_works.json, gutenberg_works.json, kcisa_books.json, extra_*.json)
 ├─ frontend/
 │  ├─ build.js                 # Vercel 빌드: API_BASE_URL → config.js, 자산 주소에 배포 버전(?v=) 부착
 │  ├─ vercel.json
 │  └─ public/ (index.html, styles.css, config.js, js/*.js)
+├─ sources/                   # 사용한 자료 (출처별 폴더: 본문 txt · 목록 CSV · 설명 README)
 ├─ docs/ (data-analysis.md, data-verification.md, duplicates-report.md, capture_screenshots.py, screenshots/)
 └─ render.yaml                 # Render Blueprint
 ```
@@ -233,6 +236,7 @@ writing-assistant/
 │    date: "1941-11-20"   value: 64   memo: "《서시》 윤동주 — 창작일 기준"
 │    genre: "시"  title  author  stage  source: "위키문헌" | "직접 작성"
 │    excerpt(본문 앞 300자)  url  pageid(중복 방지)  created_at  updated_at
+├─ library/{자동 ID}                      ← 발표 시기 미상 위키문헌 작품 (요약·추세 계산에서 제외)
 └─ conversations/{자동 ID}                ← 대화 1개 = 문서 1개
      title: "가을 수필 주제 찾기"   created_at   updated_at
      messages: [ {role, content, stage, created_at, tool_calls:[{name, arguments, reason}]}, … ]
@@ -245,13 +249,13 @@ writing-assistant/
 | 동작 | Firestore 호출 |
 |---|---|
 | Create | `collection("data").add(doc)` — 자동 ID, `created_at/updated_at` 서버에서 기록 |
-| Read (목록) | `collection("data").stream()` → 서버 메모리에 1시간 캐시, 필터·정렬·페이지는 캐시에서 처리 |
+| Read (목록) | `collection("data").stream()` → 서버 메모리에 6시간 캐시, 필터·정렬·페이지는 캐시에서 처리 |
 | Read (1건) | `document(id).get()` |
 | Update | `document(id).update(바뀐 필드)` — 없는 ID는 404 |
 | Delete | `document(id).delete()` — 없는 ID는 404 |
 | 대량 적재 | `db.batch()` 400건씩 `commit()` (시드 스크립트) |
 
-- 이 서버를 거친 쓰기는 **바뀐 문서만 캐시에 반영**해서 다음 요약·채팅이 곧바로 최신 데이터를 보면서도, 기록 1건 저장에 2,600여 건을 다시 읽지 않습니다 (Firestore 무료 한도: 하루 읽기 5만 회). 캐시는 1시간마다 새로 읽습니다.
+- 이 서버를 거친 쓰기는 **바뀐 문서만 캐시에 반영**해서 다음 요약·채팅이 곧바로 최신 데이터를 보면서도, 기록 1건 저장에 2,800여 건을 다시 읽지 않습니다 (Firestore 무료 한도: 하루 읽기 5만 회). 캐시는 6시간마다 새로 읽습니다.
 - 서비스 계정 키는 `FIREBASE_SERVICE_ACCOUNT_JSON`(배포) 또는 `FIREBASE_CREDENTIALS_PATH`(로컬)로만 받고, Firestore 보안 규칙은 **프로덕션 모드(클라이언트 직접 접근 차단)** 입니다. 브라우저는 반드시 백엔드 API를 거칩니다.
 
 ## 7. 컨텍스트 주입과 AI 호출 흐름
@@ -264,7 +268,7 @@ POST /api/chat
    ├─ ① summary_service.get_summary()          ← GET /api/data/summary 와 같은 함수
    │     + get_summary(mine=True)              ← '내가 쓴 기록'만의 요약
    ├─ ② prompts.build_system_prompt()          ← 요약 수치 + 단계별 코칭 가이드를 시스템 프롬프트에 삽입
-   ├─ ③ GPT 호출 (tools=7개, max_completion_tokens 제한, 요청 횟수 제한 통과 후)
+   ├─ ③ GPT 호출 (tools=9개, max_completion_tokens 제한, 요청 횟수 제한 통과 후)
    │     └─ tool_calls 가 오면 서버가 도구 실행 → 결과를 role=tool 로 돌려주고 재호출 (최대 3회)
    └─ ④ conversation_service: 사용자 질문 + AI 답변(+ 호출한 도구 기록)을 conversations 에 자동 저장
    │
@@ -287,7 +291,7 @@ POST /api/chat
 - 구조 → 문단 → 문장 → 단어 순서로 점검 …
 ```
 
-**원리**: GPT는 우리 DB를 모르므로 매 요청마다 "지금 이 사용자의 데이터는 이렇다"는 사실을 시스템 메시지로 넣어 줍니다. 전체 레코드(2,600+건)를 넣으면 토큰이 크게 늘어나므로 **요약만** 넣고, 더 자세한 정보(특정 작품 본문, 기간별 통계, 이전 대화)는 모델이 필요할 때 도구로 가져오게 했습니다.
+**원리**: GPT는 우리 DB를 모르므로 매 요청마다 "지금 이 사용자의 데이터는 이렇다"는 사실을 시스템 메시지로 넣어 줍니다. 전체 레코드(2,800+건)를 넣으면 토큰이 크게 늘어나므로 **요약만** 넣고, 더 자세한 정보(특정 작품 본문, 기간별 통계, 이전 대화)는 모델이 필요할 때 도구로 가져오게 했습니다.
 
 ## 8. (보너스) Function Calling — 어떤 근거로 어떤 도구를 부르나
 
@@ -383,7 +387,7 @@ python -m scripts.mcp_smoke_test https://geulbeot-api.onrender.com       # 로�
 | `#/` | 홈 | "글쓰기를 위한 AI" 소개 + 채팅 카드만. 채팅 카드 안에 주입된 요약 한 줄, 단계 칩, 장르 선택 |
 | `#/history` | 대화 기록 | 저장된 대화 카드 목록 → 불러오기(홈 채팅으로 복원) / 삭제 |
 | `#/records` | 기록 관리 | 기록 추가·수정·삭제 폼, 필터·검색·페이지 목록, CSV/JSON 내보내기 |
-| `#/insights` | 통계 | **모든 자료 한눈에**(출처별 누적 막대·시기 미상 막대·장르별 누적·출처 표) + 글자 수 요약 타일, 기간별 막대그래프, 장르·작가 분포 |
+| `#/insights` | 통계 | 장르·묶음 단위(연대/연도/월) 필터 + **모든 자료 한눈에**(출처별 누적 막대·시기 미상 막대·장르별 누적·출처 표) + 글자 수 요약 타일, 기간별 막대그래프, 장르·작가 분포 |
 
 - 해시 라우팅으로 한 페이지 안에서 화면 전환 (바닐라 JS, 프레임워크 없음)
 - 디자인 토큰: 라임 그린 CTA(`#9fe870`) 하나만 강조색으로 사용, 세이지 캔버스(`#e8ebe6`) 위 흰 카드, 올리브 톤 잉크(`#0e0f0c`), 버튼·카드 반경 24px, 입력창 1px 잉크 테두리
@@ -456,7 +460,6 @@ pytest -q                          # 21 passed — Firebase·OpenAI 키 없이 �
 | `STORAGE_BACKEND` | | `firestore`(기본) / `memory`(로컬 확인용) |
 | `KCISA_API_KEY` | | (수집 스크립트 전용) 한국문화정보원 서비스 키 — `scripts/import_kcisa.py`에서만 쓰고 배포 서버에는 넣지 않음 |
 | `KCISA_KEY_<이름>` | | (수집 스크립트 전용) 문화공공데이터광장 보충 자료 11종의 서비스 키 (`KCISA_KEY_LIB046` 등) — `scripts/import_kcisa_extra.py` |
-| `LTI_API_KEY`, `NLK_API_KEY` | | (보류) 한국문학번역원·국립중앙도서관 자체 Open API 키 — 승인 방식 때문에 보류, 수집기 `scripts/import_bib_apis.py`만 준비 |
 
 ### 프론트엔드 (Vercel)
 
@@ -473,7 +476,7 @@ pytest -q                          # 21 passed — Firebase·OpenAI 키 없이 �
 3. 환경 변수
    - 일반 값: `PYTHON_VERSION=3.12.8`, `OPENAI_BASE_URL`, `OPENAI_MODEL`, `OPENAI_MAX_TOKENS`, `STORAGE_BACKEND=firestore`, `ALLOWED_ORIGINS`
    - **비밀 값은 대시보드에서만 입력**: `OPENAI_API_KEY`, `FIREBASE_SERVICE_ACCOUNT_JSON`(키 JSON을 한 줄로)
-4. 코드를 푸시한 뒤 Render 대시보드의 **Manual Deploy**(또는 Render MCP `trigger_deploy`)로 재배포 → `https://geulbeot-api.onrender.com/docs` 확인 (서비스를 공개 저장소 URL로 만들어서 GitHub 푸시 자동 배포는 꺼져 있음. Render에 GitHub 앱을 연결하면 자동 배포로 바꿀 수 있음)
+4. 코드를 푸시한 뒤 Render 대시보드의 **Manual Deploy**(또는 Render API의 배포 요청)로 재배포 → `https://geulbeot-api.onrender.com/docs` 확인 (서비스를 공개 저장소 URL로 만들어서 GitHub 푸시 자동 배포는 꺼져 있음. Render에 GitHub 앱을 연결하면 자동 배포로 바꿀 수 있음)
 
 ### 프론트엔드 — Vercel (`geulbeot`)
 
@@ -496,7 +499,7 @@ pytest -q                          # 21 passed — Firebase·OpenAI 키 없이 �
 - 전체 데이터 대신 요약만 프롬프트에 넣음
 - 요약·검색용 전체 레코드는 서버 메모리에 **6시간** 캐시하고 쓰기는 바뀐 문서만 반영해 Firestore 읽기 횟수 절약 (서버가 깨어날 때마다 약 3,900건을 읽으므로 1시간 캐시로는 하루 5만 회 한도에 닿을 수 있음)
 - **한도 초과 대비**: Firestore 읽기가 실패하면 직전 캐시를, 캐시도 없으면 백엔드에 포함된 위키문헌 스냅샷으로 **읽기 전용** 응답을 하고 `/health`의 `degraded: true` + 화면 안내 배너로 알림 (사이트 전체가 503으로 멈추지 않음)
-- 참고 자료(공유마당·KCISA 등 3만여 건)는 Firestore 대신 JSON 파일로 두어 무료 한도를 쓰지 않음
+- 참고 자료(공유마당·KCISA·공공데이터 보충 자료 11만여 건)는 Firestore 대신 JSON 파일로 두어 무료 한도를 쓰지 않음 (서버 메모리 약 130MB, 통계 계산 0.4초 — 2분 캐시)
 
 ## 15. 스크린샷
 
@@ -567,10 +570,12 @@ pytest -q                          # 21 passed — Firebase·OpenAI 키 없이 �
 | 번역원 번역서 16만 건 중 대부분이 같은 제목 반복 | 2022년 일괄 등록분이 제목만 있는 같은 기록을 평균 28번 반복 | 기록 수가 아니라 서로 다른 번역 제목(+ISBN) 수를 세고 원작 단위로 묶음 |
 | 추천도서의 발행 연도가 1931년 등으로 잘못 잡힘 (「그 많던 싱아는 누가 다 먹었을까」) | 소개글 속 작가 출생 연도를 발행 연도로 읽음 | 형식이 분명한 발행 연도(`출판사 ｜ 2021`, 서지 문자열)만 사용 |
 | 공유마당 수필이 '비문학'으로 빠짐 (고유섭 「경인팔경」) | 요약문의 '미술 사학자'라는 말에 비문학 필터가 걸림 | 장르 태그를 우선하고 태그가 없을 때만 요약문으로 판단 |
-| Render가 GitHub 푸시로 재배포되지 않음 | 서비스를 공개 저장소 URL로 만들어 GitHub 앱 연결이 없음 | 대시보드 Manual Deploy / Render MCP `trigger_deploy`로 재배포 |
+| Render가 GitHub 푸시로 재배포되지 않음 | 서비스를 공개 저장소 URL로 만들어 GitHub 앱 연결이 없음 | 대시보드 Manual Deploy / Render API 배포 요청으로 재배포 |
 
 ## 18. 데이터 출처 및 라이선스
 
 - 작품 데이터는 [한국어 위키문헌](https://ko.wikisource.org)의 퍼블릭 도메인 저작물(저작권 보호 기간 만료 — 1962년 이전 사망 작가·작자 미상 고전)이며, 각 레코드의 `url`에 원문 링크를 남겼습니다.
 - 공유마당 자료는 한국저작권위원회가 '만료저작물(자유이용)'로 공개한 저작물의 목록 정보이며, 원문은 각 항목의 공유마당 링크에서 이용 동의 후 받을 수 있습니다. 구텐베르크 7편은 퍼블릭 도메인(초판 1889~1922, 작가 모두 1945년 이전 사망)입니다.
+- 문화공공데이터광장 보충 자료 11종(한국문학번역원, 국립중앙·국립세종·국립어린이청소년도서관, 한국출판문화산업진흥원, 한국체육산업개발, 국립민속박물관)도 같은 포털의 오픈 API 서지 정보이며, 각 자료의 링크로 원 기관의 상세 정보를 볼 수 있습니다.
+- 출처별 원본 목록과 퍼블릭 도메인 작품의 전체 본문은 [`sources/`](sources/) 폴더에 있습니다.
 - 참고 도서 목록은 [한국문화정보원 문화 공공데이터광장](https://www.culture.go.kr/data) 오픈 API(`문화체육관광부 외_기관별 도서정보`)의 서지 정보(제목·저자·발행처·소장 기관·자료 URL)이며 본문은 저장하지 않습니다. 이용 조건은 포털 이용약관을 따르고, 각 도서의 `url`에 소장 기관 자료 링크를 남겼습니다.
