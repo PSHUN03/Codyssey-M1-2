@@ -50,7 +50,9 @@ async function wakeServer() {
       const h = await api.health();
       clearTimeout(slow);
       $("#wake-banner").hidden = true;
-      setStatus("ok", h.ai_ready ? "연결됨" : "연결됨 (AI 키 없음)");
+      const degraded = $("#degraded-banner");
+      if (degraded) degraded.hidden = !h.degraded;
+      setStatus(h.degraded ? "pending" : "ok", h.degraded ? "읽기 전용" : h.ai_ready ? "연결됨" : "연결됨 (AI 키 없음)");
       return true;
     } catch (_) {
       await new Promise((r) => setTimeout(r, 3000));

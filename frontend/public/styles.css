@@ -34,6 +34,15 @@
   --bubble-ai: #e8ebe6;
   /* chart (단일 계열) */
   --series-1: #163300;
+  /* 출처별 계열 (통합 통계 누적 막대) */
+  --src-wikisource: #163300;
+  --src-mine: #9fe870;
+  --src-library: #7a9a68;
+  --src-gutenberg: #c8961a;
+  --src-gongu: #2e7d9a;
+  --src-lti: #8a57d6;
+  --src-nlk: #d0613a;
+  --src-kcisa: #a9ada5;
   /* shape & space */
   --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px; --r-pill: 9999px;
   --s-xs: 4px; --s-sm: 8px; --s-md: 12px; --s-lg: 16px; --s-xl: 24px; --s-2xl: 32px; --s-3xl: 48px;
@@ -63,6 +72,14 @@
     --bubble-user-ink: #0e0f0c;
     --bubble-ai: #262922;
     --series-1: #c5edab;
+    --src-wikisource: #c5edab;
+    --src-mine: #9fe870;
+    --src-library: #7fa36c;
+    --src-gutenberg: #e7c14a;
+    --src-gongu: #5fb3d0;
+    --src-lti: #b48cf0;
+    --src-nlk: #ef8d66;
+    --src-kcisa: #6c7168;
     --shadow-float: 0 8px 32px rgb(0 0 0 / 50%);
   }
 }
@@ -86,6 +103,14 @@
   --bubble-user-ink: #0e0f0c;
   --bubble-ai: #262922;
   --series-1: #c5edab;
+    --src-wikisource: #c5edab;
+    --src-mine: #9fe870;
+    --src-library: #7fa36c;
+    --src-gutenberg: #e7c14a;
+    --src-gongu: #5fb3d0;
+    --src-lti: #b48cf0;
+    --src-nlk: #ef8d66;
+    --src-kcisa: #6c7168;
   --shadow-float: 0 8px 32px rgb(0 0 0 / 50%);
 }
 
@@ -436,4 +461,36 @@ main { flex: 1; }
   .data-table th:nth-child(3), .data-table td:nth-child(3),
   .data-table th:nth-child(4), .data-table td:nth-child(4) { display: none; }
   .footer-links { align-items: flex-start; }
+}
+
+/* ================================================================ 통합 통계 (모든 자료 한눈에) */
+.overview-card { margin-bottom: var(--s-xl); }
+.overview-card .caption { margin-top: 4px; }
+.ov-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-md); margin-bottom: var(--s-lg); }
+.ov-tile { background: var(--surface-sunken); border-radius: var(--r-lg); padding: var(--s-lg); min-width: 0; }
+.ov-tile .label { font-size: 13px; font-weight: 600; color: var(--body); }
+.ov-tile .value { font-weight: 900; font-size: 28px; line-height: 1.15; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.ov-tile .sub { font-size: 12px; color: var(--mute); margin-top: 2px; }
+.ov-legend { display: flex; flex-wrap: wrap; gap: var(--s-sm); margin-bottom: var(--s-sm); }
+.ov-hint { margin-bottom: var(--s-lg); font-size: 13px; }
+.ov-chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--divider); background: var(--canvas); color: var(--ink);
+  border-radius: var(--r-pill); padding: 6px 12px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font); }
+.ov-chip .sw { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+.ov-chip .n { color: var(--body); font-weight: 500; font-variant-numeric: tabular-nums; }
+.ov-chip[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
+.ov-chip:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.chart .undated-sep { stroke: var(--mute); stroke-dasharray: 3 3; }
+.chart .undated-label { fill: var(--body); font-size: 11px; font-weight: 700; font-family: var(--font); }
+.ov-sub-title { font-size: 16px; font-weight: 800; margin: var(--s-xl) 0 var(--s-md); }
+.stack-bar { display: grid; grid-template-columns: 90px 1fr 80px; gap: var(--s-md); align-items: center; font-size: 14px; }
+.stack-bar .name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stack-bar .track { display: flex; height: 12px; background: var(--surface-sunken); border-radius: var(--r-pill); overflow: hidden; }
+.stack-bar .seg-fill { height: 100%; min-width: 2px; }
+.stack-bar .n { text-align: right; color: var(--body); font-variant-numeric: tabular-nums; }
+.ov-sources { width: 100%; }
+.ov-sources td .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+.section-title { font-size: 20px; font-weight: 900; letter-spacing: -0.01em; margin: var(--s-2xl) 0 var(--s-md); }
+@media (max-width: 720px) {
+  .ov-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stack-bar { grid-template-columns: 64px 1fr 64px; }
 }

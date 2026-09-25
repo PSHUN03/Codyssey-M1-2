@@ -288,3 +288,76 @@ class BookListOut(BaseModel):
     by_genre: list[GroupStat]
     source: Optional[str] = None
     items: list[BookOut]
+
+
+# ------------------------------------------------------------------ catalog (모든 출처 통합 목록·통계)
+
+class CatalogItem(BaseModel):
+    id: str
+    source: str
+    source_label: str
+    title: str
+    author: Optional[str] = None
+    genre: str
+    year: Optional[int] = Field(default=None, description="출처별 기준 연도 (basis 참고)")
+    basis: Optional[str] = Field(default=None, description="연도 근거 — 예: 공표 월, 초판 연도, 기관 등록 연도")
+    url: Optional[str] = None
+    publisher: Optional[str] = None
+    institution: Optional[str] = None
+    provider: Optional[str] = None
+    origin: Optional[str] = Field(default=None, description="원문 출전 (예: 개벽)")
+    note: Optional[str] = None
+    language: Optional[str] = None
+    chars: Optional[int] = Field(default=None, description="본문 글자 수 (본문이 있는 출처만)")
+    wikisource_url: Optional[str] = None
+
+
+class SourceCount(BaseModel):
+    key: str
+    label: str
+    count: int
+
+
+class CatalogListOut(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    by_source: list[SourceCount]
+    items: list[CatalogItem]
+
+
+class CatalogSource(BaseModel):
+    key: str
+    label: str
+    has_text: bool
+    date_basis: str
+    total: int
+    dated: int
+    undated: int
+    duplicates_removed: int = Field(description="앞 순위 출처에 이미 있어 빼낸 수")
+
+
+class CatalogPeriod(BaseModel):
+    period: str
+    total: int
+    by_source: dict[str, int]
+
+
+class CatalogGenre(BaseModel):
+    key: str
+    total: int
+    by_source: dict[str, int]
+
+
+class CatalogStatsOut(BaseModel):
+    group: str
+    genre: Optional[str] = None
+    total: int
+    dated: int
+    undated: int
+    with_text: int
+    duplicates_removed: int
+    sources: list[CatalogSource]
+    series: list[CatalogPeriod]
+    undated_by_source: dict[str, int]
+    by_genre: list[CatalogGenre]

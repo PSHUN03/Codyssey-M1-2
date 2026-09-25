@@ -6,14 +6,19 @@ API 로는 읽기만 하고(적재는 scripts/seed_firestore.py), 전체 목록�
 
 from __future__ import annotations
 
+import logging
 import threading
 import time
 from collections import Counter
 
+from google.api_core.exceptions import GoogleAPIError
+
 from ..firebase import LIBRARY_COLLECTION
 from ..storage import get_store
 
-CACHE_TTL_SECONDS = 3600
+CACHE_TTL_SECONDS = 6 * 3600
+RETRY_SECONDS = 600
+logger = logging.getLogger("geulbeot")
 
 _lock = threading.Lock()
 _cache: list[dict] | None = None
@@ -31,7 +36,18 @@ def all_works() -> list[dict]:
     global _cache, _cached_at
     with _lock:
         if _cache is None or time.time() - _cached_at > CACHE_TTL_SECONDS:
-            works = get_store().list_all(LIBRARY_COLLECTION)
+            try:
+                works = get_store().list_all(LIBRARY_COLLECTION)
+            except GoogleAPIError as e:  # 무료 한도 초과 등: 직전 캐시 → 없으면 포함된 스냅샷
+                logger.warning("Firestore 서재 읽기 실패: %s", e)
+                if _cache is None:
+                    from ..seed import load_seed_library
+
+                    works = [{**w, "id": f"lib-{w['pageid']}", "date": None} for w in load_seed_library()]
+                    works.sort(key=lambda w: (w.get("author") or "", w.get("title") or "", w["id"]))
+                    _cache = works
+                _cached_at = time.time() - CACHE_TTL_SECONDS + RETRY_SECONDS
+                return _cache
             for w in works:
                 w["date"] = None
             works.sort(key=lambda w: (w.get("author") or "", w.get("title") or "", w["id"]))

@@ -69,6 +69,20 @@ def classify(item: dict) -> tuple[str, str, str] | None:
     return None
 
 
+# 제목 속 연도: '2008 신춘문예 당선작', '(1982)이상문학상 수상작품집'처럼 발행·행사 연도인 경우가 대부분이다.
+# 단 '1920-30년대 희곡 연구', '1980년부터 1985년까지', '(1940~1945)'처럼 다루는 시대를 적은 연도는 쓰지 않는다
+TITLE_YEAR = re.compile(r"(?<![\d.])(19\d\d|20[0-2]\d)(?!\d|\s*[-~–]|년대|년부터|\s*년?\s*~)")
+
+
+def year_of(title: str, issued: str | None) -> tuple[int | None, str]:
+    """(연도, 근거): 제목의 발행 연도 → 기관 등록 연도(ISSUED_DATE)."""
+    reg = int(issued[:4]) if issued and issued[:4].isdigit() else None
+    years = [int(y) for y in TITLE_YEAR.findall(title) if not reg or int(y) <= reg]
+    if years:
+        return years[0], "제목의 발행 연도"
+    return reg, "기관 등록 연도"
+
+
 def build(items: list[dict]) -> None:
     books: dict[tuple, dict] = {}
     for it in items:
@@ -92,6 +106,7 @@ def build(items: list[dict]) -> None:
             "publisher": publisher[:80] or None,
             "genre": genre,
             "issued_date": issued or None,   # 기관 등록·디지털 발행일 (원작 발표일 아님)
+            **dict(zip(("year", "year_basis"), year_of(title, issued or None))),
             "institution": it.get("CNTC_INSTT_NM"),
             "collection": it.get("CNTC_RESRCE_NM"),
             "url": it.get("URL"),

@@ -17,7 +17,7 @@ from openai import OpenAI, OpenAIError
 from ..config import settings
 from ..prompts import build_system_prompt, summary_for_client
 from ..schemas import ChatRequest, Message, ToolCallLog
-from . import books_service, conversation_service, library_service, summary_service, tools
+from . import catalog_service, conversation_service, library_service, summary_service, tools
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ def chat(req: ChatRequest) -> dict:
     summary = summary_service.get_summary()
     mine = summary_service.get_summary(mine=True)
     system_prompt = build_system_prompt(summary, mine, req.stage, req.genre, len(library_service.all_works()),
-                                        len(books_service.all_books()))
+                                        len(catalog_service.reference_entries()))
 
     messages: list[dict] = [{"role": "system", "content": system_prompt}, *history,
                             {"role": "user", "content": req.message}]

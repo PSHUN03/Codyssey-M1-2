@@ -50,9 +50,9 @@ def search_works(keyword: str, genre: Optional[str] = None, limit: int = 5) -> d
 
 
 @mcp.tool()
-def search_books(keyword: str, genre: Optional[str] = None, limit: int = 5) -> dict:
-    """참고 도서 목록(KCISA 기관별 도서정보 중 문학 자료)을 제목·저자·발행처로 찾는다 (서지 정보만)."""
-    return _call("search_books", keyword=keyword, genre=genre, limit=limit)
+def search_books(keyword: str, genre: Optional[str] = None, source: Optional[str] = None, limit: int = 5) -> dict:
+    """참고 자료(공유마당·구텐베르크·번역원·국립중앙도서관·KCISA)를 제목·저자·발행처로 찾는다 (목록 정보와 링크)."""
+    return _call("search_books", keyword=keyword, genre=genre, source=source, limit=limit)
 
 
 @mcp.tool()

@@ -11,7 +11,7 @@ import re
 from collections import Counter
 
 from ..schemas import GENRES, STAGES
-from . import books_service, conversation_service, data_service, library_service, summary_service
+from . import catalog_service, conversation_service, data_service, library_service, summary_service
 
 _REASON = {"type": "string", "description": "이 도구를 호출하는 이유를 한 문장으로 (사용자에게 표시됨)"}
 
@@ -68,11 +68,15 @@ TOOLS = [
     ),
     _fn(
         "search_books",
-        "참고 도서 목록(한국문화정보원 기관별 도서정보 중 문학 자료: 시집·소설집·수필집·희곡 대본·문학 연구서 등)을 "
-        "제목·저자·발행처로 찾는다. 본문은 없고 서지 정보만 있다. 사용자에게 더 읽어 볼 책을 추천할 때 사용한다.",
+        "참고 자료 목록을 제목·저자·발행처·요약으로 찾는다. 출처: 공유마당 만료저작물(근대 문학·한시, 원문 링크), "
+        "구텐베르크(한국 설화의 영어 번역), 한국문학번역원 번역서, 국립중앙도서관, KCISA 기관별 도서정보(시집·소설집·"
+        "희곡 대본·평론). 본문은 없고 목록 정보와 링크만 있다(구텐베르크 제외). 더 읽어 볼 작품·책을 추천할 때 사용한다.",
         {
             "keyword": {"type": "string", "description": "검색어 (예: 시집, 윤동주, 희곡)"},
             "genre": {"type": "string", "enum": list(GENRES)},
+            "source": {"type": "string", "enum": ["gongu", "gutenberg", "lti", "nlk", "kcisa"],
+                       "description": "출처를 좁힐 때만 (공유마당 gongu, 구텐베르크 gutenberg, 번역원 lti, "
+                                      "국립중앙도서관 nlk, KCISA kcisa)"},
             "limit": {"type": "integer", "minimum": 1, "maximum": 8},
         },
         ["keyword"],
@@ -188,10 +192,12 @@ def execute(name: str, args: dict) -> dict:
                 found = found + shelf
         return {"total": len(found), "items": [_record_view(r, excerpt=250) for r in found[:limit]]}
     if name == "search_books":
-        res = books_service.list_books(q=args.get("keyword"), genre=args.get("genre"),
-                                       limit=min(int(args.get("limit", 5)), 8))
-        keep = ("title", "author", "publisher", "genre", "institution", "url", "wikisource_url")
-        return {"total": res["total"], "note": "서지 정보만 있음 (본문·원작 발표일 없음)",
+        res = catalog_service.list_entries(q=args.get("keyword"), genre=args.get("genre"), source=args.get("source"),
+                                           limit=min(int(args.get("limit", 5)), 8))
+        keep = ("source_label", "title", "author", "genre", "year", "basis", "publisher", "origin", "note", "url",
+                "wikisource_url")
+        return {"total": res["total"], "by_source": res["by_source"],
+                "note": "목록 정보와 링크만 있음. year 는 basis 가 가리키는 기준의 연도 (KCISA '기관 등록 연도'는 원작 발표일이 아님)",
                 "items": [{k: b.get(k) for k in keep if b.get(k)} for b in res["items"]]}
     if name == "read_work":
         work = data_service.get_record(args["id"]) or library_service.get_work(args["id"])

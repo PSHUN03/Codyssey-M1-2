@@ -56,3 +56,22 @@ def test_statistics_and_export(client, records):
     assert csv.headers["content-disposition"].startswith("attachment")
     assert csv.text.lstrip("﻿").splitlines()[0].startswith("id,date,value,memo")
     assert len(client.get("/api/data/export", params={"format": "json"}).json()) == 12
+
+
+def test_firestore_quota_falls_back_to_snapshot(client, monkeypatch):
+    """Firestore 가 한도 초과 등으로 실패하면 포함된 위키문헌 스냅샷으로 읽기 전용 응답을 한다."""
+    from google.api_core.exceptions import ResourceExhausted
+
+    from app import storage
+    from app.services import data_service
+
+    def boom(*_a, **_k):
+        raise ResourceExhausted("Quota exceeded.")
+
+    monkeypatch.setattr(storage.get_store(), "list_all", boom)
+    data_service.invalidate()
+    res = client.get("/api/data/summary")
+    assert res.status_code == 200 and res.json()["count"] > 100
+    assert data_service.degraded is True
+    data_service.invalidate()
+    data_service.degraded = False

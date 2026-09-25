@@ -531,6 +531,24 @@ def author_years(author_titles: list[str]) -> dict[str, int]:
 
 # ---------------------------------------------------------------- 레코드 만들기
 
+# 장르 분류가 없는 문서: 머리말 설명란의 문구로 장르를 정한다 (예: '작자 미상의 고전소설', '연경기행 가사', '편지글')
+DESC_GENRE = [
+    (r"희곡|각본", "희곡"), (r"가사(?:이다|로|체|\s*작품)|기행\s*가사|강호가사|불교가사|규방가사", "가사"),
+    (r"소설|딱지본", "소설"), (r"시조", "시조"), (r"전래동화|창작동화|동화(?:이다|집|로|를|작품)", "동화"),
+    (r"편지글|서간", "서간"), (r"창가|동요", "노래"), (r"수필|기행문|산문", "수필"), (r"평론|비평", "평론"),
+    (r"(?<![가-힣])시(?:이다|로|를|집)|서정시|신체시", "시"),
+]
+# 비문학: 설명이나 제목에 이런 말이 있으면 장르를 붙이지 않는다 (선언서·성명·역사서·연구서 등)
+NON_LITERARY_TEXT = re.compile(r"선언|성명|聲明|헌법|퇴임|遺憾|유감|상고사|사론|신론|연구|사온고|탈퇴|취지서|역사를|서술하였다|"
+                               r"협정|조약|법령|고시|통계|교과서|문법|철자법")
+
+
+def desc_genre(desc: str) -> str | None:
+    if not desc or NON_LITERARY_TEXT.search(desc):
+        return None
+    return next((g for pattern, g in DESC_GENRE if re.search(pattern, desc)), None)
+
+
 def pick_genre(categories: list[str], fallback: str | None) -> str | None:
     found = {CATEGORY_GENRE[c] for c in categories if c in CATEGORY_GENRE}
     for g in GENRE_PRIORITY:
@@ -649,7 +667,15 @@ def main() -> None:
         # 문학 작가 분류에 없고 문학 소제목도 없는 저자 문서(의서·실록 편찬자 등)의 '저작' 목록은 문학으로 보지 않는다
         literary_author = a_title in lit_authors or any(g for _, g in links)
         for t, g in links:
-            if t in title_genre or t.split("/")[0] in collections or t.split("/")[0] in NON_LITERARY_TITLES:
+            if t.split("/")[0] in collections or t.split("/")[0] in NON_LITERARY_TITLES:
+                continue
+            if t in title_genre:
+                # 연도 분류로 먼저 찾았지만 장르 분류가 없던 문서(예: 현진건 「고향」)도 저자 문서의 소제목·
+                # 문학 작가 여부로 장르를 보충한다
+                if title_genre[t] is None and (g or literary_author):
+                    via_author.setdefault(t, a_title)
+                    if g:
+                        heading_of.setdefault(t, g)
                 continue
             if not g and not literary_author:
                 unsure += 1
@@ -662,18 +688,22 @@ def main() -> None:
     pages.update(fetch_pages(list(via_author)))
     for t in via_author:
         if t in pages:
-            title_genre.setdefault(t, heading_of.get(t))
+            if title_genre.get(t) is None:
+                title_genre[t] = heading_of.get(t)
             literary.add(t)
 
     # 3) 목차 문서 → 시집형(수록작 각각) / 연재형(장 합산) ----------------------------
     serials: dict[str, str] = {}
     for t, p in pages.items():
         c = p.get("content") or ""
-        if t in collections or not c or not is_index_page(c) or t not in literary:
+        desc = header_field(c, "설명")
+        if t in collections or not c or not is_index_page(c) or (t not in literary and not desc_genre(desc)):
             continue
+        if NON_LITERARY_TEXT.search(t) and not pick_genre(p["categories"], None):
+            continue  # 역사서·선언문 등 (예: 조선상고사)
         by_name = next((g for pat, g in COLLECTION_NAME_GENRE if re.search(pat, t)), None)
         genre = (NAMED_COLLECTION_GENRE.get(t) or by_name or pick_genre(p["categories"], title_genre.get(t))
-                 or "기타")
+                 or desc_genre(desc) or "기타")
         subs = [x.split("/")[-1] for x in subpage_titles(t)]
         chapters = subs and sum(bool(CHAPTER_TITLE.match(x.strip())) for x in subs) / len(subs) >= 0.6
         if t in NAMED_COLLECTION_GENRE or re.search(r"(집|선|전집)$", t):
@@ -707,12 +737,14 @@ def main() -> None:
     records: list[dict] = []
     library: list[dict] = []   # 발표 시기 미상 (참고 작품 서재)
     skipped = defaultdict(int)
+    skipped_titles: dict[str, list[str]] = defaultdict(list)  # 재검토용 (data/.wikisource_skipped.json)
 
-    def keep(rec, date):
+    def keep(rec, date, title=""):
         if rec:
             (records if date else library).append(rec)
         else:
             skipped["본문 없음·부속 글·현대 번역"] += 1
+            skipped_titles["본문 없음·부속 글·현대 번역"].append(title)
 
     # 5) 독립 문서 --------------------------------------------------------------------
     for title, page in pages.items():
@@ -724,11 +756,14 @@ def main() -> None:
         parent = title.rsplit("/", 1)[0] if "/" in title else None
         if parent in col_pages or parent in serials:
             continue  # 시집·연재 경로에서 처리
-        genre = pick_genre(page["categories"], title_genre.get(title))
-        if not genre and title in literary:
+        genre = pick_genre(page["categories"], title_genre.get(title)) or desc_genre(header_field(content, "설명"))
+        own_author = author_page(content)
+        if (not genre and (title in literary or own_author in lit_authors)
+                and not NON_LITERARY_TEXT.search(title + " " + header_field(content, "설명"))):
             genre = "기타"  # 문학 분류·문학 저자 문서에서 찾았지만 장르 분류가 없는 작품
         if not genre:
             skipped["장르 없음(비문학)"] += 1
+            skipped_titles["장르 없음(비문학)"].append(title)
             continue
         date = resolve(title, page)
         parent_content = ((_pages.get(parent) or {}).get("content") or "") if parent else ""
@@ -736,7 +771,7 @@ def main() -> None:
         if not parent_author and title in via_author:
             parent_author = via_author[title].split(":", 1)[-1]
         note = "저자 문서의 작품 목록에서 찾음" if title in via_author and genre == "기타" else ""
-        keep(to_record(title, page, genre, date, parent, parent_author, note=note), date)
+        keep(to_record(title, page, genre, date, parent, parent_author, note=note), date, title)
 
     # 6) 시집·수필집·문집·단편소설집 수록작 ------------------------------------------
     for col_title, col_page in col_pages.items():
@@ -763,7 +798,7 @@ def main() -> None:
                     label = "사후 간행 문집" if death and col_year > death else "수록 문집"
                     date = (col_date[0], f"{label} {col_date[1].replace('발표', '간행')}")
             keep(to_record(title, page, genre, date, col_title, col_author, translated,
-                           header_field(col_content, "역자"), note), date)
+                           header_field(col_content, "역자"), note), date, title)
 
     # 7) 장편·연재물: 장별 하위 문서를 합쳐 한 작품 -------------------------------------
     for s_title, genre in serials.items():
@@ -772,6 +807,7 @@ def main() -> None:
         chars = sum(len(re.sub(r"\s", "", b)) for _, _, b in bodies)
         if chars < MIN_CHARS:
             skipped["연재물 본문 없음"] += 1
+            skipped_titles["연재물 본문 없음"].append(s_title)
             continue
         ch_dates = sorted(d for _, ch, b in bodies
                           if (d := own_date(b, ch["categories"], header_field(ch.get("content") or "", "설명"))))
@@ -824,6 +860,8 @@ def main() -> None:
             shelf[key] = r
     library = sorted(shelf.values(), key=lambda r: (r["author"], r["title"]))
     save_caches()
+    (DATA_DIR / ".wikisource_skipped.json").write_text(json.dumps(skipped_titles, ensure_ascii=False, indent=1),
+                                                     encoding="utf-8")
 
     result = sorted(records, key=lambda r: (r["date"], r["title"]))
     OUT_PATH.write_text(json.dumps({

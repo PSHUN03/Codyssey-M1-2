@@ -1,30 +1,30 @@
 # 작품 데이터 실존 검증
 
-> 자동 생성: `python -m scripts.verify_works` · 검증 시각 2026-09-24T16:21:33+00:00 · 수집 시각 2026-09-24T16:16:06+00:00
+> 자동 생성: `python -m scripts.verify_works` · 검증 시각 2026-09-25T02:00:59+00:00 · 수집 시각 2026-09-25T01:58:11+00:00
 
 모든 레코드를 위키문헌 API에 **문서 번호(pageid)로 다시 조회**해 확인했습니다.
 
 | 항목 | 결과 |
 |---|---|
-| 전체 | 3,657편 (시계열 2,613 + 참고 작품 서재 1,044) |
-| 위키문헌에 문서가 존재 | 3,657편 (100.0%) |
-| 문서 제목이 레코드 URL과 일치 | 3,657편 |
-| 퍼블릭 도메인 라이선스 확인(본문 또는 목차 문서) | 3,515편 |
-| 라이선스 틀이 없는 문서 | 142편 — 수집기가 저작자 사망 연도(1962년 이전)로 확인했거나 작자 미상 고전 작품. 1963년 이후 사망한 작가의 작품은 틀과 관계없이 수집 단계에서 제외 |
+| 전체 | 3,873편 (시계열 2,834 + 참고 작품 서재 1,039) |
+| 위키문헌에 문서가 존재 | 3,873편 (100.0%) |
+| 문서 제목이 레코드 URL과 일치 | 3,873편 |
+| 퍼블릭 도메인 라이선스 확인(본문 또는 목차 문서) | 3,714편 |
+| 라이선스 틀이 없는 문서 | 159편 — 수집기가 저작자 사망 연도(1962년 이전)로 확인했거나 작자 미상 고전 작품. 1963년 이후 사망한 작가의 작품은 틀과 관계없이 수집 단계에서 제외 |
 
 ## 날짜 근거별 분포
 
 | 날짜 근거 | 작품 수 |
 |---|---|
-| 발표 시기 미상 | 1,044 |
-| 수록 문집 간행 연도 | 908 |
-| 발표 월 | 590 |
-| 발표 연도 | 469 |
+| 발표 시기 미상 | 1,039 |
+| 수록 문집 간행 연도 | 913 |
+| 발표 월 | 664 |
+| 발표 연도 | 585 |
 | 저자 문서 발표 연도 | 180 |
-| 발표일 | 142 |
+| 발표일 | 161 |
 | 사후 간행 문집 간행 연도 | 120 |
 | 수록 문집 간행일 | 115 |
-| 창작일 | 65 |
+| 창작일 | 72 |
 | 창작 월 | 21 |
 | 수록 문집 저자 문서 간행 연도 | 2 |
 | 연재 첫 회 창작일 | 1 |
@@ -33,26 +33,26 @@
 
 | 날짜 | 작품 | 지은이 | 장르 | 글자 수 | 날짜 근거 |
 |---|---|---|---|---|---|
-| 1595-01-01 | [내나히닐ᄒᆞᆫ다ᄉᆞ새](https://ko.wikisource.org/wiki/%EB%82%B4_%EB%82%98%ED%9E%88_%EB%8B%90%ED%9D%94%EB%8B%A4%EC%82%AC%EC%83%88) | 김계 | 시조 | 77 | 발표 연도 |
-| 1922-12-01 | [말세(末世)의 희탄](https://ko.wikisource.org/wiki/%EB%A7%90%EC%84%B8%EC%9D%98_%ED%9D%AC%ED%83%84) | 이상화 | 시 | 142 | 발표 월 |
-| 1923-05-01 | [잃어진 봄](https://ko.wikisource.org/wiki/%ED%95%B4%ED%8C%8C%EB%A6%AC%EC%9D%98_%EB%85%B8%EB%9E%98/%EC%9E%83%EC%96%B4%EC%A7%84_%EB%B4%84) | 김억 | 시 | 197 | 발표 월 |
-| 1924-01-01 | [죽음](https://ko.wikisource.org/wiki/%EC%A3%BD%EC%9D%8C) | 한용운 | 장편소설 | 63,075 | 발표 연도 |
-| 1925-01-01 | [고양이와 개](https://ko.wikisource.org/wiki/%EC%84%B8%EA%B3%84%EC%9D%BC%EC%A3%BC_%EB%8F%99%ED%99%94%EC%A7%91/%EA%B3%A0%EC%96%91%EC%9D%B4%EC%99%80_%EA%B0%9C) | 이정호 | 동화 | 5,042 | 수록 문집 간행 연도 |
-| 1926-05-10 | [마의태자](https://ko.wikisource.org/wiki/%EB%A7%88%EC%9D%98%ED%83%9C%EC%9E%90) | 이광수 | 중편소설 | 283,317 | 발표일 |
-| 1927-01-01 | [기이](https://ko.wikisource.org/wiki/%ED%9D%91%EB%B0%A9%EC%9D%98_%EC%84%A0%EB%AC%BC/%EA%B8%B0%EC%9D%B4) | 권구현 | 시 | 67 | 수록 문집 간행 연도 |
-| 1934-12-01 | [가정 음악에 대하여](https://ko.wikisource.org/wiki/%EC%9D%8C%EC%95%85%EB%A7%8C%ED%95%84/%EA%B0%80%EC%A0%95_%EC%9D%8C%EC%95%85%EC%97%90_%EB%8C%80%ED%95%98%EC%97%AC) | 홍난파 | 수필 | 4,683 | 발표 월 |
-| 1938-01-01 | [분이](https://ko.wikisource.org/wiki/%EC%82%B0%ED%98%B8%EB%A6%BC/%EB%B6%84%EC%9D%B4) | 노천명 | 시 | 290 | 수록 문집 간행 연도 |
-| 1938-01-01 | [전쟁의 곡](https://ko.wikisource.org/wiki/%EC%9D%8C%EC%95%85%EB%A7%8C%ED%95%84/%EC%A0%84%EC%9F%81%EC%9D%98_%EA%B3%A1) | 홍난파 | 수필 | 3,335 | 발표 연도 |
-| 1939-01-01 | [정소발](https://ko.wikisource.org/wiki/%EC%A0%9C%EC%99%95%EC%9A%B4%EA%B8%B0_%28%EC%A1%B0%EC%84%A0%EA%B3%A0%EC%A0%84%EA%B0%84%ED%96%89%ED%9A%8C%29/%EC%A0%95%EC%86%8C%EB%B0%9C) | 이승휴 | 한시 | 75 | 발표 연도 |
-| 1939-01-01 | [화물 자동차](https://ko.wikisource.org/wiki/%ED%83%9C%EC%96%91%EC%9D%98_%ED%92%8D%EC%86%8D/%ED%99%94%EB%AC%BC_%EC%9E%90%EB%8F%99%EC%B0%A8) | 김기림 | 시 | 181 | 수록 문집 간행 연도 |
-| 1939-01-01 | [센티멘탈](https://ko.wikisource.org/wiki/%EB%B0%95%EC%9A%A9%EC%B2%A0_%EC%8B%9C%EC%A7%91/%EC%84%BC%ED%8B%B0%EB%A9%98%ED%83%88) | 박용철 | 시 | 312 | 사후 간행 문집 간행 연도 |
-| 1942-01-01 | [銃, 一億자루 나아간다](https://ko.wikisource.org/wiki/%EC%B4%9D%2C_%EC%9D%BC%EC%96%B5_%EC%9E%90%EB%A3%A8_%EB%82%98%EC%95%84%EA%B0%84%EB%8B%A4) | 白山靑樹 | 시 | 791 | 발표일 |
-| 1943-12-01 | [계란](https://ko.wikisource.org/wiki/%EC%83%81%EC%95%84%ED%83%91/%EA%B3%84%EB%9E%80) | 계용묵 | 수필 | 1,170 | 발표 월 |
-| 1946-01-01 | [송(宋) 첨지](https://ko.wikisource.org/wiki/%EC%86%A1%EC%B2%A8%EC%A7%80) | 김동인 | 단편소설 | 7,171 | 발표 월 |
-| 1948-01-01 | [매화 칠장](https://ko.wikisource.org/wiki/%EB%8B%B4%EC%9B%90%EC%8B%9C%EC%A1%B0/%EB%A7%A4%ED%99%94_%EC%B9%A0%EC%9E%A5) | 정인보 | 시 | 368 | 수록 문집 간행 연도 |
-| 1949-01-01 | [온몸을 감도는 붉은 핏줄](https://ko.wikisource.org/wiki/%EC%98%81%EB%9E%91%EC%8B%9C%EC%84%A0/%EC%98%A8%EB%AA%B8%EC%9D%84_%EA%B0%90%EB%8F%84%EB%8A%94_%EB%B6%89%EC%9D%80_%ED%95%8F%EC%A4%84) | 김영랑 | 시 | 45 | 수록 문집 간행 연도 |
-| 1955-01-01 | [애기의 새벽](https://ko.wikisource.org/wiki/%ED%95%98%EB%8A%98%EA%B3%BC_%EB%B0%94%EB%9E%8C%EA%B3%BC_%EB%B3%84%EA%B3%BC_%EC%8B%9C_%281955%EB%85%84%29/%EC%95%A0%EA%B8%B0%EC%9D%98_%EC%83%88%EB%B2%BD) | 윤동주 | 시 | 62 | 저자 문서 발표 연도 |
-| 1955-01-01 | [달을 쏘다](https://ko.wikisource.org/wiki/%ED%95%98%EB%8A%98%EA%B3%BC_%EB%B0%94%EB%9E%8C%EA%B3%BC_%EB%B3%84%EA%B3%BC_%EC%8B%9C_%281955%EB%85%84%29/%EB%8B%AC%EC%9D%84_%EC%8F%98%EB%8B%A4) | 윤동주 | 시 | 1,230 | 저자 문서 발표 연도 |
+| 1565-01-01 | [도산십이곡](https://ko.wikisource.org/wiki/%EB%8F%84%EC%82%B0%EC%8B%AD%EC%9D%B4%EA%B3%A1) | 이황 | 시조 | 604 | 발표 연도 |
+| 1921-01-01 | [폐허 잡기](https://ko.wikisource.org/wiki/%ED%8F%90%ED%97%88_%EC%9E%A1%EA%B8%B0_%28%EB%82%A8%EA%B6%81%EB%B2%BD%29) | 남궁벽 | 수필 | 681 | 발표 월 |
+| 1923-01-01 | [사랑의 때](https://ko.wikisource.org/wiki/%ED%95%B4%ED%8C%8C%EB%A6%AC%EC%9D%98_%EB%85%B8%EB%9E%98/%EC%82%AC%EB%9E%91%EC%9D%98_%EB%95%8C) | 김억 | 시 | 354 | 수록 문집 간행 연도 |
+| 1923-09-01 | [그리움의 한묵금](https://ko.wikisource.org/wiki/%EA%B7%B8%EB%A6%AC%EC%9B%80%EC%9D%98_%ED%95%9C%EB%AC%B6%EC%9D%8C) | 홍사용 | 수필 | 10,576 | 발표 월 |
+| 1926-01-01 | [만월대(滿月臺)에서](https://ko.wikisource.org/wiki/%EB%B0%B1%ED%8C%94%EB%B2%88%EB%87%8C/%EB%A7%8C%EC%9B%94%EB%8C%80%EC%97%90%EC%84%9C) | 최남선 | 시 | 890 | 수록 문집 간행 연도 |
+| 1926-01-01 | [호랑이 형님](https://ko.wikisource.org/wiki/%ED%98%B8%EB%9E%91%EC%9D%B4_%ED%98%95%EB%8B%98) | 방정환 | 동화 | 1,630 | 발표 연도 |
+| 1931-02-01 | [기생집 문 앞에서 맴돌이하던 이야기](https://ko.wikisource.org/wiki/%EA%B8%B0%EC%83%9D%EC%A7%91_%EB%AC%B8_%EC%95%9E%EC%97%90%EC%84%9C_%EB%A7%B4%EB%8F%8C%EC%9D%B4%ED%95%98%EB%8D%98_%EC%9D%B4%EC%95%BC%EA%B8%B0) | 채만식 | 단편소설 | 1,407 | 발표 월 |
+| 1936-10-23 | [가을밤](https://ko.wikisource.org/wiki/%ED%95%98%EB%8A%98%EA%B3%BC_%EB%B0%94%EB%9E%8C%EA%B3%BC_%EB%B3%84%EA%B3%BC_%EC%8B%9C_%281979%EB%85%84%29/%EA%B0%80%EC%9D%84%EB%B0%A4) | 윤동주 | 시 | 48 | 발표일 |
+| 1937-10-01 | [파첩](https://ko.wikisource.org/wiki/%ED%8C%8C%EC%B2%A9) | 이상 | 시 | 1,057 | 발표 월 |
+| 1938-01-01 | [죽어서는 손해](https://ko.wikisource.org/wiki/%EC%9D%8C%EC%95%85%EB%A7%8C%ED%95%84/%EC%A3%BD%EC%96%B4%EC%84%9C%EB%8A%94_%EC%86%90%ED%95%B4) | 홍난파 | 수필 | 200 | 발표 연도 |
+| 1938-06-01 | [환시기](https://ko.wikisource.org/wiki/%ED%99%98%EC%8B%9C%EA%B8%B0) | 이상 | 단편소설 | 4,711 | 발표 월 |
+| 1939-01-01 | [고향 앞에서](https://ko.wikisource.org/wiki/%EB%82%98_%EC%82%AC%EB%8A%94_%EA%B3%B3/%EA%B3%A0%ED%96%A5_%EC%95%9E%EC%97%90%EC%84%9C) | 오장환 | 시 | 223 | 수록 문집 간행 연도 |
+| 1939-01-01 | [플레커](https://ko.wikisource.org/wiki/%EB%B0%95%EC%9A%A9%EC%B2%A0_%EB%B2%88%EC%97%AD%EC%8B%9C%EC%A7%91/%ED%94%8C%EB%A0%88%EC%BB%A4) | 플레커(옮김) | 시 | 196 | 사후 간행 문집 간행 연도 |
+| 1939-01-01 | [왓슨](https://ko.wikisource.org/wiki/%EB%B0%95%EC%9A%A9%EC%B2%A0_%EB%B2%88%EC%97%AD%EC%8B%9C%EC%A7%91/%EC%99%93%EC%8A%A8) | 왓슨(옮김) | 시 | 132 | 사후 간행 문집 간행 연도 |
+| 1940-01-01 | [내가 좋아하는 솔](https://ko.wikisource.org/wiki/%EB%82%B4%EA%B0%80_%EC%A2%8B%EC%95%84%ED%95%98%EB%8A%94_%EC%86%94) | 강경애 | 기타 | 1,640 | 저자 문서 발표 연도 |
+| 1941-01-01 | [비둘기](https://ko.wikisource.org/wiki/%EB%B0%B1%EB%A1%9D%EB%8B%B4/%EB%B9%84%EB%91%98%EA%B8%B0) | 정지용 | 시 | 1,392 | 수록 문집 간행 연도 |
+| 1942-01-01 | [집](https://ko.wikisource.org/wiki/%EC%A7%91) | 채만식 | 소설 | 34,353 | 저자 문서 발표 연도 |
+| 1945-01-01 | [묘지](https://ko.wikisource.org/wiki/%EC%B0%BD%EB%B3%80/%EB%AC%98%EC%A7%80) | 노천명 | 시 | 153 | 수록 문집 간행 연도 |
+| 1946-01-01 | [强盜에게 주는詩](https://ko.wikisource.org/wiki/%EB%B3%91%EB%93%A0_%EC%84%9C%EC%9A%B8/%EA%B0%95%EB%8F%84%EC%97%90%EA%B2%8C_%EC%A3%BC%EB%8A%94_%EC%8B%9C) | 오장환 | 시 | 180 | 수록 문집 간행 연도 |
+| 1948-01-01 | [피리](https://ko.wikisource.org/wiki/%ED%94%BC%EB%A6%AC/%ED%94%BC%EB%A6%AC) | 윤곤강 | 시 | 330 | 수록 문집 간행 연도 |
 
 ## 참고 작품 서재 무작위 표본 10편 (발표 시기 미상 — 시계열 통계 제외)
 
@@ -60,11 +60,11 @@
 |---|---|---|---|---|
 | [한 손에 막ᄃᆡ를 들고](https://ko.wikisource.org/wiki/%ED%95%9C_%EC%86%90%EC%97%90_%EB%A7%89%EB%8C%80%EB%A5%BC_%EB%93%A4%EA%B3%A0) | 작자 미상 | 노래 | 58 | 《한 손에 막ᄃᆡ를 들고》 작자 미상 — 발표 시기 미상 기준 · 가곡원류에 실린 작자 미상의 시조. |
 | [운소(雲霄)에 오르잔들](https://ko.wikisource.org/wiki/%EC%9A%B4%EC%86%8C%EC%97%90_%EC%98%A4%EB%A5%B4%EC%9E%94%EB%93%A4) | 김천택 | 시조 | 53 | 《운소(雲霄)에 오르잔들》 김천택 — 발표 시기 미상 기준 · 청구영언에 실려 있다. |
+| [대지(大地)의 찬](https://ko.wikisource.org/wiki/%EB%8C%80%EC%A7%80%EC%9D%98_%EC%B0%AC) | 남궁벽 | 시 | 140 | 《대지(大地)의 찬》 남궁벽 — 발표 시기 미상 기준 · 『폐허』 2호 |
 | [고려사](https://ko.wikisource.org/wiki/%EA%B7%B8%EB%82%A0%EC%9D%B4_%EC%98%A4%EB%A9%B4/%EA%B3%A0%EB%A0%A4%EC%82%AC) | 심훈 | 시조 | 65 | 《고려사》 심훈 — 발표 시기 미상 기준 · 《그날이 오면》 수록 · 수록 판본은 1949년 후대 간행본 |
-| [하우씨(夏禹氏) 제(濟)헐 제](https://ko.wikisource.org/wiki/%ED%95%98%EC%9A%B0%EC%94%A8_%EC%A0%9C%ED%95%98%ED%95%A0_%EC%A0%9C) | 영조 | 시조 | 48 | 《하우씨(夏禹氏) 제(濟)헐 제》 영조 — 발표 시기 미상 기준 · 가곡원류에 실려 있다. 잠저 시절 지은  |
-| [장마가 실어온 발복](https://ko.wikisource.org/wiki/%EC%9E%A5%EB%A7%88%EA%B0%80_%EC%8B%A4%EC%96%B4%EC%98%A8_%EB%B0%9C%EB%B3%B5) | 윤백남 | 소설 | 5,025 | 《장마가 실어온 발복》 윤백남 — 발표 시기 미상 기준 |
-| [서산(西山)에 일모(日暮)ᄒᆞ니](https://ko.wikisource.org/wiki/%EC%84%9C%EC%82%B0%EC%97%90_%EC%9D%BC%EB%AA%A8%ED%95%98%EB%8B%88) | 이명한 | 노래 | 130 | 《서산(西山)에 일모(日暮)ᄒᆞ니》 이명한 — 발표 시기 미상 기준 · 가곡원류에 저자 이름 없이 곡조를 달 |
-| [낙엽을 태우면서](https://ko.wikisource.org/wiki/%EB%82%99%EC%97%BD%EC%9D%84_%ED%83%9C%EC%9A%B0%EB%A9%B4%EC%84%9C) | 이효석 | 수필 | 1,885 | 《낙엽을 태우면서》 이효석 — 발표 시기 미상 기준 |
-| [일정(一定) 백년(百年)을 산들](https://ko.wikisource.org/wiki/%EC%9D%BC%EC%A0%95_%EB%B0%B1%EB%85%84%EC%9D%84_%EC%82%B0%EB%93%A4) | 정철 | 시조 | 44 | 《일정(一定) 백년(百年)을 산들》 정철 — 발표 시기 미상 기준 · 가곡원류에 실린 시조. 정철의 일정 백 |
-| [河伯[하백]의 由來[유래]](https://ko.wikisource.org/wiki/%ED%95%98%EB%B0%B1%EC%9D%98_%EC%9C%A0%EB%9E%98) | 최남선 | 수필 | 2,291 | 《河伯[하백]의 由來[유래]》 최남선 — 발표 시기 미상 기준 |
-| [사서문변](https://ko.wikisource.org/wiki/%EB%8B%B4%ED%97%8C%EC%84%9C/%EB%82%B4%EC%A7%91_1%EA%B6%8C/%EC%82%AC%EC%84%9C%EB%AC%B8%EB%B3%80) | 홍대용 | 서간 | 14,220 | 《사서문변》 홍대용 — 발표 시기 미상 기준 · 《담헌서》 수록 · 수록 판본은 1939년 후대 간행본 |
+| [곡구롱(谷口哢) 우는 소ᄅᆡ에](https://ko.wikisource.org/wiki/%EA%B3%A1%EA%B5%AC%EB%A1%B1_%EC%9A%B0%EB%8A%94_%EC%86%8C%EB%A6%AC%EC%97%90) | 오경화 | 시조 | 65 | 《곡구롱(谷口哢) 우는 소ᄅᆡ에》 오경화 — 발표 시기 미상 기준 · 가곡원류에 실린 시조. |
+| [적괴 유의](https://ko.wikisource.org/wiki/%EC%A0%81%EA%B4%B4%EC%9C%A0%EC%9D%98) | 윤백남 | 단편소설 | 8,510 | 《적괴 유의》 윤백남 — 발표 시기 미상 기준 |
+| [울며 ᄌᆞᆸ운 ᄉᆞᄆᆡ](https://ko.wikisource.org/wiki/%EC%9A%B8%EB%A9%B0_%EC%9E%A1%EC%9D%80_%EC%86%8C%EB%A7%A4) | 이명한 | 시조 | 121 | 《울며 ᄌᆞᆸ운 ᄉᆞᄆᆡ》 이명한 — 발표 시기 미상 기준 · 가곡원류에 두 차례 실려 있는데, 저자 이름이 |
+| [중서당(中書堂) 백옥배(白玉盃)를](https://ko.wikisource.org/wiki/%EC%A4%91%EC%84%9C%EB%8B%B9_%EB%B0%B1%EC%98%A5%EB%B0%B0%EB%A5%BC) | 정철 | 시조 | 66 | 《중서당(中書堂) 백옥배(白玉盃)를》 정철 — 발표 시기 미상 기준 · 가곡원류에 실린 시조. 정철의 중서당 |
+| [蜃氣樓傳記[신기루전기]](https://ko.wikisource.org/wiki/%EC%8B%A0%EA%B8%B0%EB%A3%A8%EC%A0%84%EA%B8%B0) | 최남선 | 수필 | 1,885 | 《蜃氣樓傳記[신기루전기]》 최남선 — 발표 시기 미상 기준 |
+| [유향교](https://ko.wikisource.org/wiki/%EB%8B%B4%ED%97%8C%EC%84%9C/%EB%82%B4%EC%A7%91_4%EA%B6%8C/%EB%B3%B4%EC%9C%A0/%EC%9C%A0%ED%96%A5%EA%B5%90) | 홍대용 | 서간 | 410 | 《유향교》 홍대용 — 발표 시기 미상 기준 · 《담헌서》 수록 · 수록 판본은 1939년 후대 간행본 |

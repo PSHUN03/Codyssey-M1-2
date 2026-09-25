@@ -46,6 +46,10 @@
     <strong>서버를 깨우는 중이에요.</strong>
     무료 서버는 한동안 쓰지 않으면 잠들어서 첫 연결에 최대 1분 정도 걸릴 수 있어요.
   </div>
+  <div id="degraded-banner" class="wake-banner" hidden role="status">
+    <strong>지금은 읽기 전용이에요.</strong>
+    데이터베이스(Firestore 무료 한도)에 잠시 연결할 수 없어 백엔드에 포함된 위키문헌 작품 목록으로 보여 드려요. 기록 저장·대화 기록은 한도가 초기화된 뒤 다시 쓸 수 있어요.
+  </div>
 
   <main>
     <!-- ============================ 홈: 설명 + 채팅 ============================ -->
@@ -164,7 +168,12 @@
                 <option value="true">내가 쓴 기록</option>
                 <option value="false">위키문헌 작품</option>
                 <option value="library">참고 작품 서재 (발표 시기 미상)</option>
-                <option value="books">참고 도서 목록 (KCISA 서지 정보)</option>
+                <option value="books">참고 자료 전체 (공유마당·구텐베르크·KCISA 등)</option>
+                <option value="ref:gongu">└ 공유마당 만료저작물</option>
+                <option value="ref:gutenberg">└ 구텐베르크 (영어)</option>
+                <option value="ref:lti">└ 한국문학번역원 번역서</option>
+                <option value="ref:nlk">└ 국립중앙도서관</option>
+                <option value="ref:kcisa">└ KCISA 도서정보</option>
               </select>
               <select id="f-genre" class="genre-select" data-empty="전체 장르" aria-label="장르"></select>
               <input id="f-q" type="search" maxlength="50" placeholder="제목 · 지은이 · 메모 검색" aria-label="검색" />
@@ -213,6 +222,30 @@
             </select>
           </div>
         </div>
+        <section class="card overview-card" aria-labelledby="ov-title">
+          <div class="card-head">
+            <div>
+              <h2 id="ov-title" class="display-xs">모든 자료 한눈에</h2>
+              <p id="ov-sub" class="caption">위키문헌·내 기록·공유마당·구텐베르크·KCISA 등 모든 출처를 중복 없이 합쳤어요.</p>
+            </div>
+            <div class="seg" id="ov-group" role="radiogroup" aria-label="묶음 단위">
+              <button role="radio" data-group="decade" aria-checked="true">연대별</button>
+              <button role="radio" data-group="century" aria-checked="false">세기별</button>
+            </div>
+          </div>
+          <div id="ov-tiles" class="ov-tiles"></div>
+          <div id="ov-legend" class="ov-legend" aria-label="출처 (눌러서 켜고 끄기)"></div>
+          <p id="ov-hint" class="caption ov-hint"></p>
+          <div id="ov-chart" class="chart" role="img"></div>
+          <details class="table-view">
+            <summary>출처별 표로 보기 (연도 기준 설명 포함)</summary>
+            <div id="ov-table" class="table-wrap"></div>
+          </details>
+          <h3 class="ov-sub-title">장르별 분포 (출처별 누적)</h3>
+          <div id="ov-genres" class="hbars"></div>
+        </section>
+        <h2 class="section-title">본문이 있는 작품의 글자 수 흐름</h2>
+        <p class="caption library-note">위키문헌 시계열 작품과 내가 쓴 기록만 해당해요 (날짜와 글자 수가 모두 있는 자료). 이 요약이 AI 채팅에 주입돼요.</p>
         <div id="stat-tiles" class="stat-tiles"></div>
         <p id="library-note" class="caption library-note"></p>
         <section class="card chart-card">

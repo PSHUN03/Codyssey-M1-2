@@ -1,5 +1,6 @@
 // 통계 화면: 요약 타일 + 기간별 막대그래프(SVG 직접 렌더링) + 장르/작가 분포
 import { api } from "./api.js";
+import { initOverview, loadOverview } from "./overview.js";
 import { $, $$, compact, esc, fmt, hideTooltip, showTooltip } from "./ui.js";
 
 const METRIC_LABEL = { count: "작품 수", average: "평균 글자 수", total: "총 글자 수" };
@@ -105,6 +106,7 @@ function tiles(s, stats) {
 
 export async function loadInsights() {
   state.group = $("#i-group").value;
+  loadOverview($("#i-genre").value);
   try {
     const p = params();
     const [s, stats] = await Promise.all([api.summary(p), api.statistics({ ...p, group: state.group })]);
@@ -114,7 +116,7 @@ export async function loadInsights() {
     hbars($("#genre-bars"), s.by_genre, "편");
     api.listLibrary({ limit: 1 }).then((lib) => {
       const note = $("#library-note");
-      if (note) note.textContent = `※ 발표 시기를 확인할 수 없는 참고 작품 ${fmt(lib.total)}편은 시계열 통계에서 제외하고, AI 작품 검색과 '기록 관리 › 참고 작품 서재'에서만 쓰여요.`;
+      if (note) note.textContent = `※ 발표 시기를 확인할 수 없는 위키문헌 서재 ${fmt(lib.total)}편과 참고 자료(공유마당·KCISA 등)는 글자 수가 없거나 날짜가 없어 아래 그래프에서는 빠지고, 위 '모든 자료 한눈에'에 함께 집계돼요.`;
     }).catch(() => {});
     hbars($("#author-bars"), stats.top_authors, "편");
   } catch (e) {
@@ -123,12 +125,13 @@ export async function loadInsights() {
 }
 
 export function initInsights() {
+  initOverview(() => $("#i-genre").value);
   ["#i-mine", "#i-genre", "#i-group"].forEach((s) => $(s).addEventListener("change", loadInsights));
-  $(".seg").addEventListener("click", (e) => {
+  $(".chart-card .seg").addEventListener("click", (e) => {
     const b = e.target.closest("button[data-metric]");
     if (!b) return;
     state.metric = b.dataset.metric;
-    $$(".seg button").forEach((x) => x.setAttribute("aria-checked", String(x === b)));
+    $$(".chart-card .seg button").forEach((x) => x.setAttribute("aria-checked", String(x === b)));
     renderChart();
   });
   let t;

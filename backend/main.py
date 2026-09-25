@@ -15,7 +15,7 @@ from google.api_core.exceptions import GoogleAPIError
 from app.config import settings
 from app.firebase import FirebaseNotConfigured
 from app.mcp_remote import build_routes as mcp_routes, mcp
-from app.routers import books, chat, conversations, data, library
+from app.routers import books, catalog, chat, conversations, data, library
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("writing-assistant")
@@ -89,13 +89,19 @@ def root():
 
 @app.get("/health", tags=["health"], summary="헬스 체크 (콜드스타트 깨우기용)")
 def health():
-    return {"status": "ok", "storage": settings.storage_backend, "ai_ready": bool(settings.openai_api_key)}
+    from app.services import data_service
+
+    if settings.storage_backend == "firestore":
+        data_service.all_records()  # 깨울 때 미리 읽어 두고(캐시), Firestore 이상 여부를 degraded 로 알린다
+    return {"status": "ok", "storage": settings.storage_backend, "ai_ready": bool(settings.openai_api_key),
+            "degraded": data_service.degraded}
 
 
 app.include_router(data.router)
 app.include_router(conversations.router)
 app.include_router(library.router)
 app.include_router(books.router)
+app.include_router(catalog.router)
 app.include_router(chat.router)
 
 # 원격 MCP 서버: /mcp (MCP 프로토콜 엔드포인트라 Swagger 에는 나타나지 않는다)

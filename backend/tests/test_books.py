@@ -1,6 +1,6 @@
 import json
 
-from app.services import books_service, tools
+from app.services import books_service, catalog_service, tools
 
 
 def _books_file(tmp_path, monkeypatch):
@@ -12,7 +12,14 @@ def _books_file(tmp_path, monkeypatch):
          "institution": "한국문화예술위원회", "collection": "예술자료원-소장자료", "url": None, "copies": 1},
     ]}, ensure_ascii=False), encoding="utf-8")
     monkeypatch.setattr(books_service, "BOOKS_PATH", path)
-    books_service._load.cache_clear()
+    monkeypatch.setattr(catalog_service, "DATA", tmp_path)  # 다른 참고 출처 파일 없음
+    _clear()
+
+
+def _clear():
+    for f in (books_service._load, catalog_service._static, catalog_service._wikisource_keys):
+        f.cache_clear()
+    catalog_service.invalidate()
 
 
 def test_books_endpoint_and_tool(client, tmp_path, monkeypatch):
@@ -21,6 +28,6 @@ def test_books_endpoint_and_tool(client, tmp_path, monkeypatch):
     assert res["total"] == 1 and res["items"][0]["copies"] == 2
     assert client.get("/api/books", params={"genre": "희곡"}).json()["total"] == 1
     found = tools.execute("search_books", {"keyword": "고도"})
-    assert found["items"][0]["title"] == "고도를 기다리며" and "본문" in found["note"]
-    assert client.get("/api/data/summary").json()["count"] == 0  # 시계열 통계에 들어가지 않는다
-    books_service._load.cache_clear()
+    assert found["items"][0]["title"] == "고도를 기다리며" and "링크" in found["note"]
+    assert client.get("/api/data/summary").json()["count"] == 0  # 글자 수 시계열 요약에는 들어가지 않는다
+    _clear()

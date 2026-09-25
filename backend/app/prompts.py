@@ -14,7 +14,7 @@ SYSTEM_TEMPLATE = """당신은 '글벗'이라는 글쓰기 코치 AI입니다.
 - 장르 분포: {by_genre}
 - 출처 분포: {by_source}
 - 참고 작품 서재: 발표 시기를 확인할 수 없는 실존 작품 {library_count}편 (위 통계에는 포함되지 않음, search_works 로 검색 가능)
-- 참고 도서 목록: 한국문화정보원 기관별 도서정보 중 문학 자료 {books_count}권 (서지 정보만, search_books 로 검색해 읽을거리 추천에 사용)
+- 참고 자료 목록: 공유마당·구텐베르크·번역원·국립중앙도서관·KCISA 문학 자료 {books_count}건 (중복 제외, 목록 정보와 링크, search_books 로 검색해 읽을거리 추천에 사용)
 
 [사용자가 직접 쓴 기록]
 - 기간: {mine_period} / {mine_count}건 / 평균 {mine_average}자
